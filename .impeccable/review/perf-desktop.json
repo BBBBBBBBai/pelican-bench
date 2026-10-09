@@ -1,0 +1,318 @@
+{
+  "label": "desktop",
+  "url": "http://127.0.0.1:5174/",
+  "viewport": {
+    "W": 1440,
+    "H": 900,
+    "mobile": false
+  },
+  "network": {
+    "requestCount": 53,
+    "byType": {
+      "Document": 1,
+      "Script": 24,
+      "Font": 2,
+      "Fetch": 4,
+      "Other": 1,
+      "Image": 21
+    },
+    "totalKB": 1901,
+    "fontRequests": [
+      {
+        "url": "archivo-latin.woff2",
+        "kb": 88,
+        "status": 200,
+        "fromCache": false
+      },
+      {
+        "url": "azeret-mono-latin.woff2",
+        "kb": 26,
+        "status": 200,
+        "fromCache": false
+      }
+    ],
+    "css": [],
+    "scripts": [
+      {
+        "url": "client",
+        "kb": 179
+      },
+      {
+        "url": "main.tsx",
+        "kb": 2
+      },
+      {
+        "url": "env.mjs",
+        "kb": 4
+      },
+      {
+        "url": "react.js?v=66beaf4b",
+        "kb": 1
+      },
+      {
+        "url": "react_jsx-dev-runtime.js?v=66beaf4b",
+        "kb": 36
+      },
+      {
+        "url": "@react-refresh",
+        "kb": 111
+      },
+      {
+        "url": "react-dom_client.js?v=66beaf4b",
+        "kb": 1
+      },
+      {
+        "url": "styles.css",
+        "kb": 42
+      },
+      {
+        "url": "App.tsx",
+        "kb": 29
+      },
+      {
+        "url": "chunk-REFQX4J5.js?v=66beaf4b",
+        "kb": 76
+      },
+      {
+        "url": "api.ts",
+        "kb": 12
+      },
+      {
+        "url": "i18n.ts",
+        "kb": 40
+      },
+      {
+        "url": "BusBar.tsx",
+        "kb": 16
+      },
+      {
+        "url": "Rack.tsx",
+        "kb": 48
+      },
+      {
+        "url": "LiveBay.tsx",
+        "kb": 21
+      },
+      {
+        "url": "SpecimenSheet.tsx",
+        "kb": 53
+      },
+      {
+        "url": "bits.tsx",
+        "kb": 29
+      },
+      {
+        "url": "ControlPanel.tsx",
+        "kb": 83
+      },
+      {
+        "url": "Icon.tsx",
+        "kb": 13
+      },
+      {
+        "url": "svgCheck.ts",
+        "kb": 4
+      },
+      {
+        "url": "SvgFrame.tsx",
+        "kb": 6
+      },
+      {
+        "url": "types.ts",
+        "kb": 7
+      },
+      {
+        "url": "svg.ts",
+        "kb": 13
+      },
+      {
+        "url": "chunk-HCIN4FJ4.js?v=66beaf4b",
+        "kb": 910
+      }
+    ],
+    "images": [
+      {
+        "url": "favicon.ico",
+        "kb": 0,
+        "type": "Other"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      }
+    ],
+    "failures": [],
+    "status4xx5xx": [
+      {
+        "url": "favicon.ico",
+        "status": 404
+      }
+    ]
+  },
+  "timing": {
+    "ttfb": 2,
+    "domInteractive": 9,
+    "domContentLoaded": 60,
+    "loadEvent": 61,
+    "firstPaint": 80,
+    "firstContentfulPaint": 80
+  },
+  "fonts": {
+    "count": 4,
+    "list": [
+      {
+        "family": "Archivo",
+        "weight": "100 900",
+        "status": "loaded"
+      },
+      {
+        "family": "Archivo",
+        "weight": "100 900",
+        "status": "unloaded"
+      },
+      {
+        "family": "Azeret Mono",
+        "weight": "100 900",
+        "status": "loaded"
+      },
+      {
+        "family": "Azeret Mono",
+        "weight": "100 900",
+        "status": "unloaded"
+      }
+    ],
+    "allLoaded": "loaded"
+  },
+  "longTasks": [],
+  "layoutCost": {
+    "forcedReflowMs": 0
+  },
+  "rendering": {
+    "totalCells": 26,
+    "totalImgs": 20,
+    "imgsInViewport": 5,
+    "imgsDecoded": 18,
+    "imgsNotYetLoaded": 2,
+    "domNodes": 539
+  },
+  "interactionCost": {
+    "switchProviderMs": 15.5
+  },
+  "chromeMetrics": {
+    "Documents": 46,
+    "Nodes": 1520,
+    "LayoutCount": 7,
+    "RecalcStyleCount": 7,
+    "LayoutDuration": 0.041,
+    "RecalcStyleDuration": 0.005,
+    "ScriptDuration": 0.037,
+    "TaskDuration": 0.137,
+    "JSHeapUsedSize": 4121292,
+    "JSHeapTotalSize": 6967296
+  },
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "exceptions": []
+}

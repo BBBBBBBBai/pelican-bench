@@ -1,0 +1,2 @@
+﻿--do → {"gridInfo":{"overflowX":"auto","overflowY":"auto","border":"1px solid rgb(45, 44, 40)","box":{"left":1109,"right":1424,"top":357,"bottom":577}},"ringInfo":{"left":1108,"right":1425,"top":414,"bottom":446},"clipped":{"left":true,"right":true,"top":false,"bottom":false},"backdrop":{"leftOfRing":"bay-section","rightOfRing":"bay-section","aboveRing":"mp-cell","belowRing":"mp-cell"},"overlap":{"gapPx":1,"ringIntrudesIntoPrev":1,"ringIntrudesIntoNext":1},"cellBox":{"h":28,"w":313}}
+wrote E:\学习资料\dsh\鹈鹕测试工具\.impeccable\review\critique-mine-ring.png (154504 bytes)

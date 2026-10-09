@@ -1,0 +1,232 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-06T22:05:00.000Z",
+  "title": "Design System: 动物骑单车测试台",
+  "extensions": {
+    "colorMeta": {
+      "room": {
+        "role": "neutral",
+        "displayName": "Room（机架背后的房间）",
+        "canonical": "#0c0c0b",
+        "tonalRamp": ["#0c0c0b", "#141412", "#1c1c19", "#252521", "#2e2e29", "#383832", "#42423b", "#4d4d45"]
+      },
+      "panel": {
+        "role": "neutral",
+        "displayName": "Anodized Panel（哑光阳极氧化面板）",
+        "canonical": "#191917",
+        "tonalRamp": ["#0d0d0c", "#151513", "#1e1e1b", "#272723", "#30302b", "#3a3a34", "#45453e", "#505048"]
+      },
+      "panel-high": {
+        "role": "neutral",
+        "displayName": "Handled Panel（被手摸过的面板）",
+        "canonical": "#21201d",
+        "tonalRamp": ["#101010", "#191917", "#21201d", "#2a2925", "#33322d", "#3d3c36", "#47463f", "#525149"]
+      },
+      "well": {
+        "role": "neutral",
+        "displayName": "Well（凹槽）",
+        "canonical": "#101010",
+        "tonalRamp": ["#080807", "#101010", "#181817", "#21211f", "#2a2a28", "#343431", "#3e3e3a", "#494943"]
+      },
+      "engrave": {
+        "role": "neutral",
+        "displayName": "Engraved Line（刻线）",
+        "canonical": "#2d2c28",
+        "tonalRamp": ["#141412", "#1c1b19", "#24231f", "#2d2c28", "#363530", "#403f39", "#4a4942", "#55544c"]
+      },
+      "silk": {
+        "role": "neutral",
+        "displayName": "Primary Silk（主丝印）",
+        "canonical": "#e6e3da",
+        "tonalRamp": ["#4c4b47", "#5f5e58", "#737169", "#87857b", "#9b998e", "#b0ada1", "#c7c4b9", "#e6e3da"]
+      },
+      "silk-secondary": {
+        "role": "neutral",
+        "displayName": "Secondary Silk（次级丝印）",
+        "canonical": "#a8a49a",
+        "tonalRamp": ["#3a3936", "#494844", "#595750", "#6a685f", "#7b786e", "#8d8a7f", "#9a978c", "#a8a49a"]
+      },
+      "silk-mute": {
+        "role": "neutral",
+        "displayName": "Mute Silk（刻线级丝印）",
+        "canonical": "#8f8c82",
+        "tonalRamp": ["#33322f", "#403f3b", "#4e4c47", "#5c5a54", "#6a6861", "#78766d", "#838077", "#8f8c82"]
+      },
+      "lamp-amber": {
+        "role": "primary",
+        "displayName": "Lamp Amber（琥珀指示灯）",
+        "canonical": "#f0a020",
+        "tonalRamp": ["#2b1c05", "#4d3208", "#70470b", "#925d0e", "#b57311", "#d88d19", "#f0a020", "#f7c266"]
+      },
+      "pass-green": {
+        "role": "secondary",
+        "displayName": "Pass Green（通行）",
+        "canonical": "#8faa62",
+        "tonalRamp": ["#1b2112", "#2d371e", "#404e2a", "#546536", "#687d43", "#7b9451", "#8faa62", "#aec585"]
+      },
+      "caution-amber": {
+        "role": "secondary",
+        "displayName": "Caution Amber（警示铭牌）",
+        "canonical": "#c8862f",
+        "tonalRamp": ["#26190a", "#412c11", "#5c3f19", "#775220", "#925f28", "#ad7330", "#c8862f", "#dcb072"]
+      },
+      "fault-orange": {
+        "role": "tertiary",
+        "displayName": "Fault Orange（故障）",
+        "canonical": "#e4643f",
+        "tonalRamp": ["#2c130b", "#4a2113", "#692f1b", "#883d23", "#a74c2b", "#c65432", "#e4643f", "#f0a189"]
+      }
+    },
+    "typographyMeta": {
+      "address": { "displayName": "Address", "purpose": "通道地址 R 2026-10-06 / CH 07。引用某一次运行的唯一坐标，级别最高。" },
+      "reading": { "displayName": "Reading", "purpose": "一切量化事实：耗时、参数、用量、字符数、模型名。右对齐成列。" },
+      "silk-label": { "displayName": "Silk Label", "purpose": "字段标签、区块标题、按钮字。Archivo 宽度轴压到 74。" },
+      "silk-caps": { "displayName": "Silk Caps", "purpose": "通道标记铭牌。只在挂了标记时出现，宽度轴 76。" },
+      "nameplate": { "displayName": "Nameplate", "purpose": "只用于左上角的 ANIMAL BIKE BENCH。世界最窄最重的一行丝印，宽度轴 68、14px。" },
+      "window-readout": { "displayName": "Window Readout", "purpose": "总线条读数窗里的数字与状态。全屏最大的等宽字，因为要一眼看到，15px。" },
+      "body": { "displayName": "Body", "purpose": "题面、错误正文、说明文字。宽度轴 92。" }
+    },
+    "shadows": [
+      { "name": "cavity", "value": "inset 0 2px 4px rgba(0, 0, 0, 0.8)", "purpose": "凹槽：输入框、开关底座、被按下的挡位、被选中的档案工位。" },
+      { "name": "plate-edge", "value": "0 1px 1px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.055)", "purpose": "按键的实体感：一条底部投影加一条顶部受光。带偏移，不是光晕。" },
+      { "name": "lamp-glow-pass", "value": "0 0 5px rgba(143, 170, 98, 0.55), inset 0 0 0 1px rgba(0, 0, 0, 0.45)", "purpose": "通行状态指示灯。只加在 7px 的小灯上。" },
+      { "name": "lamp-glow-live", "value": "0 0 8px rgba(240, 160, 32, 0.7), inset 0 0 0 1px rgba(0, 0, 0, 0.4)", "purpose": "正在通电的那一路。配合 lamp-strike 动画。" }
+    ],
+    "motion": [
+      { "name": "state-ease", "value": "0.14s ease-out", "purpose": "按钮与可点元素的底色 / 字色过渡。唯一的常规过渡。" },
+      { "name": "lamp-strike", "value": "lamp-strike 0.42s cubic-bezier(0.16, 1, 0.3, 1) both", "purpose": "全世界唯一的编排动作：指示灯亮起，从 blur(3px) scale(.55) 到实心。" },
+      { "name": "sheet-in", "value": "sheet-in 0.18s ease-out", "purpose": "标本页出现。位移极小，不弹跳。" }
+    ],
+    "breakpoints": [
+      { "name": "narrow", "value": "1040px", "note": "右栏收窄。" },
+      { "name": "stack", "value": "900px", "note": "右栏落到机架下方。" },
+      { "name": "phone", "value": "620px", "note": "总线条改为可折行；挡位换行显示全名；格宽三档重给 132 / 168 / 210px。" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Button",
+      "kind": "button",
+      "refersTo": "button",
+      "description": "普通动作。哑光面板上的一颗实体按键，顶部受光、底部有影。",
+      "html": "<button class=\"ds-btn\">编辑档案</button>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; font-family: var(--font-silk, 'Archivo', sans-serif); font-variation-settings: 'wdth' 82; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; font-size: 10.5px; padding: 8px 12px; color: var(--silk-dim, #a8a49a); background: var(--panel-hi, #21201d); border: 1px solid var(--engrave-hi, #3d3a34); border-radius: 0; box-shadow: 0 1px 1px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.055); cursor: pointer; white-space: nowrap; transition: background 0.14s ease-out, color 0.14s ease-out; } .ds-btn:hover:not(:disabled) { color: var(--silk, #e6e3da); background: #262521; } .ds-btn:active:not(:disabled) { box-shadow: inset 0 2px 4px rgba(0,0,0,0.8); transform: translateY(1px); } .ds-btn:focus-visible { outline: 2px solid var(--lamp, #f0a020); outline-offset: 2px; } .ds-btn:disabled { color: #4d4b45; cursor: not-allowed; box-shadow: none; }"
+    },
+    {
+      "name": "Arm Button",
+      "kind": "button",
+      "refersTo": "button-arm",
+      "description": "开始生成。琥珀字，是控制台上唯一带强调色的动作。",
+      "html": "<button class=\"ds-btn-arm\">开始生成</button>",
+      "css": ".ds-btn-arm { display: inline-flex; align-items: center; justify-content: center; gap: 7px; width: 100%; font-family: var(--font-silk, 'Archivo', sans-serif); font-variation-settings: 'wdth' 82; font-weight: 700; text-transform: uppercase; letter-spacing: 0.2em; font-size: 12px; padding: 12px 14px; color: var(--lamp, #f0a020); background: var(--panel-hi, #21201d); border: 1px solid #5a4520; border-radius: 0; box-shadow: 0 1px 1px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.055); cursor: pointer; transition: background 0.14s ease-out, color 0.14s ease-out; } .ds-btn-arm:hover:not(:disabled) { background: #241d10; color: var(--lamp, #f0a020); } .ds-btn-arm:active:not(:disabled) { box-shadow: inset 0 2px 4px rgba(0,0,0,0.8); transform: translateY(1px); } .ds-btn-arm:focus-visible { outline: 2px solid var(--lamp, #f0a020); outline-offset: 2px; } .ds-btn-arm:disabled { color: #4d4b45; border-color: var(--engrave-hi, #3d3a34); cursor: not-allowed; }"
+    },
+    {
+      "name": "Halt Button",
+      "kind": "button",
+      "refersTo": "button-halt",
+      "description": "停止 / 删除。和开始生成同一个位置、同一个尺寸，只是状态不同。按下第一段进入 .armed：文字换成「确认删除」、键座凹进去、刻线提亮，但什么都不删。",
+      "html": "<button class=\"ds-btn-halt\">停止</button>",
+      "css": ".ds-btn-halt { display: inline-flex; align-items: center; justify-content: center; gap: 7px; width: 100%; font-family: var(--font-silk, 'Archivo', sans-serif); font-variation-settings: 'wdth' 82; font-weight: 700; text-transform: uppercase; letter-spacing: 0.2em; font-size: 12px; padding: 12px 14px; color: var(--fault, #e4643f); background: var(--panel-hi, #21201d); border: 1px solid #5a2f22; border-radius: 0; box-shadow: 0 1px 1px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.055); cursor: pointer; transition: background 0.14s ease-out, color 0.14s ease-out; } .ds-btn-halt:hover:not(:disabled) { background: #241512; } .ds-btn-halt:focus-visible { outline: 2px solid var(--lamp, #f0a020); outline-offset: 2px; } .ds-btn-halt.armed, .ds-btn-halt.armed:hover:not(:disabled) { background: #241512; border-color: #8a4630; color: var(--fault, #e4643f); box-shadow: inset 0 2px 4px rgba(0,0,0,0.8), inset 0 -1px 0 rgba(255,255,255,0.04); }"
+    },
+    {
+      "name": "Switch（拨档开关）",
+      "kind": "custom",
+      "refersTo": "switch",
+      "description": "一组互斥选项。选中的挡位是真的被按进去的（凹槽），不是高亮的 tab。",
+      "html": "<div class=\"ds-sw\"><button aria-pressed=\"false\">新的在前</button><button aria-pressed=\"true\">旧的在前</button></div>",
+      "css": ".ds-sw { display: inline-flex; background: var(--well, #101010); border: 1px solid var(--engrave, #2d2c28); box-shadow: inset 0 1px 3px rgba(0,0,0,0.6); } .ds-sw > button { appearance: none; border: 0; border-right: 1px solid var(--engrave, #2d2c28); background: transparent; color: var(--silk-mute, #8f8c82); font-family: var(--font-silk, 'Archivo', sans-serif); font-variation-settings: 'wdth' 74; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; font-size: 9.5px; padding: 7px 10px; cursor: pointer; white-space: nowrap; } .ds-sw > button:last-child { border-right: 0; } .ds-sw > button:hover { color: var(--silk-dim, #a8a49a); } .ds-sw > button[aria-pressed='true'] { background: #0b0b0a; color: var(--lamp, #f0a020); box-shadow: inset 0 2px 4px rgba(0,0,0,0.8), inset 0 -1px 0 rgba(255,255,255,0.04); } .ds-sw > button:focus-visible { outline: 2px solid var(--lamp, #f0a020); outline-offset: 2px; }"
+    },
+    {
+      "name": "Supplier Detents（供应商挡位）",
+      "kind": "custom",
+      "refersTo": "switch",
+      "description": "供应商筛选。用 1px 缝隙刻开而不是按钮边框，并且允许折行——名字必须显示全。",
+      "html": "<div class=\"ds-detents\"><button aria-pressed=\"true\">全部</button><button aria-pressed=\"false\">原厂直连</button><button aria-pressed=\"false\">官方格式 · 长思考</button></div>",
+      "css": ".ds-detents { display: inline-flex; flex-wrap: wrap; gap: 1px; background: var(--engrave, #2d2c28); border: 1px solid var(--engrave, #2d2c28); padding: 1px; max-width: 230px; } .ds-detents > button { appearance: none; border: 0; background: var(--well, #101010); color: var(--silk-mute, #8f8c82); font-family: var(--font-silk, 'Archivo', sans-serif); font-variation-settings: 'wdth' 88; font-weight: 600; font-size: 10.5px; padding: 6px 9px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ds-detents > button:hover { color: var(--silk-dim, #a8a49a); } .ds-detents > button[aria-pressed='true'] { background: #0b0b0a; color: var(--lamp, #f0a020); box-shadow: inset 0 2px 4px rgba(0,0,0,0.8), inset 0 -1px 0 rgba(255,255,255,0.04); } .ds-detents > button:focus-visible { outline: 2px solid var(--lamp, #f0a020); outline-offset: 2px; }"
+    },
+    {
+      "name": "Channel Tile（通道格）",
+      "kind": "card",
+      "refersTo": "channel-tile",
+      "description": "一次运行一格。画面固定 4:3 且背景透明，作品自己的底色原样透出来；丝印刻在画面下方。左上角指示灯、右上角通道地址。",
+      "html": "<article class=\"ds-ch\"><header class=\"ds-ch-head\"><span class=\"ds-lamp ok\"></span><span class=\"ds-ch-spacer\"></span><span class=\"ds-ch-dur\">518ms</span><span class=\"ds-ch-no\">CH 07</span></header><div class=\"ds-ch-plate\"></div><div class=\"ds-ch-silk\"><span class=\"ds-ch-animal\">鹈鹕</span><span class=\"ds-ch-prov\">原厂直连</span><span class=\"ds-ch-model\">mock-good</span><span class=\"ds-ch-when\">2026-10-06 21:50</span></div></article>",
+      "css": ".ds-ch { position: relative; display: flex; flex-direction: column; background: var(--panel, #191917); border-left: 1px solid var(--engrave, #2d2c28); border-top: 1px solid var(--engrave, #2d2c28); cursor: pointer; } .ds-ch:hover { background: var(--panel-hi, #21201d); } .ds-ch-head { display: flex; align-items: center; gap: 7px; padding: 7px 9px 5px; } .ds-ch-no { font-family: var(--font-read, monospace); font-size: 11px; font-weight: 700; letter-spacing: 0.04em; color: var(--silk, #e6e3da); font-variant-numeric: tabular-nums; } .ds-ch-spacer { flex: 1; } .ds-ch-dur { font-family: var(--font-read, monospace); font-size: 10.5px; color: var(--silk-mute, #8f8c82); font-variant-numeric: tabular-nums; } .ds-ch-plate { flex: none; aspect-ratio: 4 / 3; background: transparent; } .ds-ch-silk { display: flex; flex-direction: column; gap: 2px; padding: 7px 9px 9px; border-top: 1px solid var(--engrave, #2d2c28); } .ds-ch-animal { font-size: 12.5px; font-weight: 600; color: var(--silk, #e6e3da); } .ds-ch-prov { font-size: 11px; color: var(--silk-dim, #a8a49a); } .ds-ch-model, .ds-ch-when { font-family: var(--font-read, monospace); font-size: 10px; color: var(--silk-mute, #8f8c82); font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Flag Tag（标记铭牌）",
+      "kind": "chip",
+      "refersTo": "channel-tag",
+      "description": "刻在通道下方的结论。只有两种色调：要注意是警示琥珀，真出事（请求失败／超时／渲染失败）是故障橙。槽位永远留着。",
+      "html": "<div class=\"ds-tags\"><span class=\"ds-tag\">模型名不符</span><span class=\"ds-tag fault\">渲染失败</span></div>",
+      "css": ".ds-tags { display: flex; flex-wrap: wrap; gap: 4px; align-content: flex-start; min-height: 19px; margin-top: 3px; } .ds-tag { font-family: var(--font-silk, 'Archivo', sans-serif); font-variation-settings: 'wdth' 76; font-weight: 700; text-transform: uppercase; letter-spacing: 0.11em; font-size: 9px; line-height: 13px; padding: 1px 5px; border: 1px solid currentColor; color: var(--warn, #c8862f); } .ds-tag.fault { color: var(--fault, #e4643f); }"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "凹槽式输入框。标签在上方，9.5px 全大写工业丝印。",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">模型名</span><input class=\"ds-input\" value=\"mock-good\" /></label>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 4px; } .ds-field-label { font-family: var(--font-silk, 'Archivo', sans-serif); font-variation-settings: 'wdth' 74; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; font-size: 9.5px; color: var(--silk-mute, #8f8c82); } .ds-input { appearance: none; width: 100%; background: var(--well, #101010); border: 1px solid var(--engrave, #2d2c28); border-radius: 0; padding: 7px 9px; color: var(--silk, #e6e3da); font-family: var(--font-read, monospace); font-size: 11.5px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.5); } .ds-input::placeholder { color: var(--silk-mute, #8f8c82); } .ds-input:focus { outline: 2px solid var(--lamp, #f0a020); outline-offset: 0; }"
+    },
+    {
+      "name": "Profile Slot（档案工位）",
+      "kind": "card",
+      "refersTo": "profile-slot",
+      "description": "名册里一行一个供应商。选中是凹槽加琥珀名字，不改变任何尺寸。",
+      "html": "<button class=\"ds-slot\" aria-pressed=\"true\"><span class=\"ds-lamp on\"></span><span class=\"ds-slot-body\"><span class=\"ds-slot-name\">原厂直连</span><span class=\"ds-slot-sub\">mock-good  OI · T=1 · MAX=4096</span></span></button>",
+      "css": ".ds-slot { display: flex; align-items: center; gap: 9px; width: 100%; text-align: left; padding: 8px 10px; background: var(--panel, #191917); border: 0; border-bottom: 1px solid var(--engrave, #2d2c28); border-radius: 0; cursor: pointer; } .ds-slot:last-child { border-bottom: 0; } .ds-slot:hover { background: rgba(255,255,255,0.02); } .ds-slot[aria-pressed='true'] { background: #0a0a09; box-shadow: inset 0 2px 4px rgba(0,0,0,0.75); } .ds-slot:focus-visible { outline: 2px solid var(--lamp, #f0a020); outline-offset: -2px; } .ds-slot-body { flex: 1; min-width: 0; display: block; } .ds-slot-name { display: block; font-size: 12.5px; font-weight: 600; color: var(--silk, #e6e3da); } .ds-slot[aria-pressed='true'] .ds-slot-name { color: var(--lamp, #f0a020); } .ds-slot-sub { display: block; font-family: var(--font-read, monospace); font-size: 10px; color: var(--silk-mute, #8f8c82); }"
+    },
+    {
+      "name": "Lamp（指示灯）",
+      "kind": "custom",
+      "refersTo": "switch",
+      "description": "7px 实心圆，全世界唯一的圆。四种状态：熄灭 / 通行 / 警告 / 故障 / 通电。",
+      "html": "<span class=\"ds-lamp-live\"></span>",
+      "css": ".ds-lamp-live { width: 7px; height: 7px; flex: none; display: inline-block; border-radius: 50%; background: var(--lamp, #f0a020); box-shadow: 0 0 8px rgba(240,160,32,0.7), inset 0 0 0 1px rgba(0,0,0,0.4); animation: ds-lamp-strike 0.42s cubic-bezier(0.16, 1, 0.3, 1) both; } @keyframes ds-lamp-strike { from { filter: blur(3px); transform: scale(0.55); opacity: 0.35; } to { filter: blur(0); transform: scale(1); opacity: 1; } }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Anodized Bench",
+    "overview": "这套界面不是网页，是一台仪器。它假定自己坐在一张真的工作台上：哑光阳极氧化的深色面板、刻在面板上的工业丝印、凹进去的读数窗、以及只在通电那一路亮起的琥珀指示灯。房间里没有别的光源 —— 光只从灯里出来，不从边上漏。所以这里没有渐变、没有玻璃、没有发光描边、没有投影，深度全部由「凹进去」和「刻上去」表达，而不是由浮起来表达。\n\n密度是刻意的。这是一个要在一屏里扫过几十件作品、并且要能一眼截出单格发给别人的工具，所以信息密度优先于单条展示面积。字小（9–12.5px）但对比度全部过 4.5:1 —— 这些最小的字印的正是「哪一天、第几号通道、哪一家、什么参数」，就是这个工具的全部结论。\n\n作品永远高于界面。每一次运行是一个通道，画面就是通道上那块被点亮的显示屏，界面在它周围退让：没有卡片容器、没有装饰边框、没有阴影垫在画面下面。屏幕上的画面尺寸固定为 4:3 且四边对齐，所以相邻两格的作品可以直接比大小 —— 这是这个工具存在的理由。",
+    "keyCharacteristics": [
+      "哑光阳极氧化深色面板（#191917）坐在更暗的房间（#0c0c0b）里，两者之间只靠 1px 刻线分开。",
+      "琥珀（#f0a020）是默认世界里唯一的饱和颜色，只用于指示、选中和「正在通电」。",
+      "全是直角（border-radius: 0），唯一的圆是 7px 的指示灯。",
+      "两套字：Archivo 可变字体做工业丝印（窄体大写，wdth 74），Azeret Mono 做一切量化读数（tabular-nums）。",
+      "全局只有一个编排动作：灯丝亮起（lamp-strike，0.42s）。别处不做入场动画。"
+    ],
+    "rules": [
+      { "name": "The One Light Rule", "body": "一个屏幕里只允许一处饱和色出现：琥珀。信号色（绿 / 黄 / 橙）只以 7px 的小灯、或 9px 的刻字出现，永远不铺成面积。界面上任何一处大面积鲜艳色彩都是错的。", "section": "colors" },
+      { "name": "The Three Silks Rule", "body": "丝印只有三档灰度，三级都必须过 4.5:1。不允许出现第四档更暗的灰 —— 「再暗一点会更好看」在这里是禁止的，因为最暗的那档印的仍然是要读的结论。", "section": "colors" },
+      { "name": "The Never-Grey Rule", "body": "深色面上的次级文字从暖调前景取色（#a8a49a / #8f8c82），不用中性灰。中性灰会让哑光阳极氧化的暖调面板显得脏。", "section": "colors" },
+      { "name": "The Width Axis Rule", "body": "丝印一律用 Archivo 的宽度轴压窄（标签 74 / 铭牌 76 / 按钮 82 / 正文 92）。这不是装饰：窄体让 9.5px 的大写标签在 348px 宽的右栏里放得下，同时仍然读得像刻字。永远不要用 letter-spacing 去假装这个效果。", "section": "typography" },
+      { "name": "The Mono-Is-Not-Costume Rule", "body": "Azeret Mono 只承载量化事实（时间、参数、用量、编号、模型名、地址）。它是读数，不是「技术感」的戏服 —— 正文、按钮、标签一律不许用等宽字体。", "section": "typography" },
+      { "name": "The Light-Only-From-Lamps Rule", "body": "除了指示灯自己，屏幕上任何东西都不发光。禁止彩色光晕、禁止 text-shadow、禁止渐变文字、禁止 backdrop-filter。要表达强调就用刻线提亮（--engrave → --engrave-hi）或凹槽加深，不用发光。", "section": "elevation" },
+      { "name": "The No-Nesting Rule", "body": "一个通道格内部不允许再出现有边框的容器。画面直接坐在面板上，丝印直接刻在面板上。嵌套卡片永远是错的。", "section": "elevation" }
+    ],
+    "dos": [
+      "Do 让画面自己说话：.ch-plate 背景永远透明，作品自己的底色原样透出来。工具不替模型补台面。",
+      "Do 用 aspect-ratio: 4 / 3 + 固定 19px 的铭牌槽位这两个常数保证整面机架行高一致 —— 相邻两格的作品要能直接比大小。",
+      "Do 把一切量化事实写成 Azeret Mono 的 tabular 读数，并且在标本页里右对齐成一列。",
+      "Do 用凹槽（inset 阴影）和刻线（1px --engrave）表达层级。光从上方来，凹进去的上沿背光。",
+      "Do 让琥珀只出现在「正在通电 / 已被选中」上，一个屏幕里至多一处成面积。",
+      "Do 把丝印压窄（Archivo wdth 74–82）来换空间，不要用 letter-spacing 假装窄体。",
+      "Do 让空状态占着原来的位置并大声说出来（.broken 的斜纹帽 + 橙色「没有 SVG」）—— 空画面是最坏结果，不能是最安静的一格。",
+      "Do 每一个 <details>、每一颗灯、每一个开关都给全 hover / focus-visible / disabled 状态，并且给浏览器自带的那一层（::selection、caret-color、滚动条、:focus-visible）也上色。"
+    ],
+    "donts": [
+      "Don't 用圆角。全站只有 0 和指示灯那个 50%。",
+      "Don't 发光：不要彩色光晕、不要 text-shadow、不要渐变文字、不要装饰性玻璃或 backdrop-filter。",
+      "Don't 嵌套卡片。通道格内部、标本页内部都不允许再出现有边框的容器。",
+      "Don't 用超过 1px 的彩色 border-left / border-right 当强调条。",
+      "Don't 用硬偏移方块阴影（box-shadow: 4px 4px 0）。阴影必须带偏移与柔和模糊，零偏移彩色光晕是装饰。",
+      "Don't 把 Azeret Mono 当「技术感」的戏服。它只承载量化事实。",
+      "Don't 用 Unicode 字符或 emoji 当图标。图标是自绘的 16×16 SVG，统一 strokeWidth 1.5、strokeLinecap=\"square\"、fill=\"none\"。",
+      "Don't 用中性灰做深色面上的次级文字 —— 从暖调前景取色。",
+      "Don't 做入场动画。全世界只有一个编排动作：指示灯亮起（lamp-strike，0.42s）。",
+      "Don't 用 hero 大数字、eyebrow / kicker 小标题、或 01/02/03 的段落编号。这台仪器没有标题区，第一屏就是机架本身。",
+      "Don't 给某个格子加 aspect-ratio 去凑行高 —— 那会压缩画面，而画面是这个工具的主体。",
+      "Don't 用一个隐藏的横向滚动条装供应商挡位。要比较的就是「哪一家」，名字必须显示全，折行可以。"
+    ]
+  }
+}

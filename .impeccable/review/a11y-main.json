@@ -1,0 +1,397 @@
+{
+  "landmarks": {
+    "main": 0,
+    "nav": 0,
+    "header": 0,
+    "aside": 0,
+    "section": 4,
+    "footer": 0
+  },
+  "headings": [],
+  "roleHeading": 0,
+  "htmlLang": "zh-CN",
+  "interactiveCount": 60,
+  "nameless": [
+    "INPUT.",
+    "INPUT.",
+    "INPUT.",
+    "INPUT.",
+    "INPUT.",
+    "INPUT.",
+    "INPUT."
+  ],
+  "iconOnly": [],
+  "nonInteractiveClick": [
+    "DIV."
+  ],
+  "ariaPressed": [
+    {
+      "cls": "",
+      "v": "true"
+    },
+    {
+      "cls": "",
+      "v": "false"
+    },
+    {
+      "cls": "",
+      "v": "true"
+    },
+    {
+      "cls": "",
+      "v": "false"
+    },
+    {
+      "cls": "",
+      "v": "false"
+    },
+    {
+      "cls": "",
+      "v": "false"
+    },
+    {
+      "cls": "",
+      "v": "false"
+    },
+    {
+      "cls": "",
+      "v": "false"
+    },
+    {
+      "cls": "",
+      "v": "false"
+    },
+    {
+      "cls": "",
+      "v": "false"
+    },
+    {
+      "cls": "",
+      "v": "false"
+    },
+    {
+      "cls": "",
+      "v": "false"
+    },
+    {
+      "cls": "",
+      "v": "true"
+    },
+    {
+      "cls": "",
+      "v": "false"
+    },
+    {
+      "cls": "",
+      "v": "false"
+    },
+    {
+      "cls": "",
+      "v": "true"
+    },
+    {
+      "cls": "",
+      "v": "false"
+    },
+    {
+      "cls": "",
+      "v": "true"
+    },
+    {
+      "cls": "",
+      "v": "false"
+    },
+    {
+      "cls": "slot",
+      "v": "true"
+    },
+    {
+      "cls": "",
+      "v": "true"
+    },
+    {
+      "cls": "",
+      "v": "false"
+    }
+  ],
+  "pressedOnSwitchGroup": [
+    {
+      "txt": "中",
+      "pressed": "true",
+      "role": null
+    },
+    {
+      "txt": "EN",
+      "pressed": "false",
+      "role": null
+    },
+    {
+      "txt": "新的在前",
+      "pressed": "true",
+      "role": null
+    },
+    {
+      "txt": "旧的在前",
+      "pressed": "false",
+      "role": null
+    },
+    {
+      "txt": "小",
+      "pressed": "false",
+      "role": null
+    },
+    {
+      "txt": "中",
+      "pressed": "true",
+      "role": null
+    },
+    {
+      "txt": "大",
+      "pressed": "false",
+      "role": null
+    },
+    {
+      "txt": "全部",
+      "pressed": "true",
+      "role": null
+    },
+    {
+      "txt": "只看有异常的",
+      "pressed": "false",
+      "role": null
+    },
+    {
+      "txt": "中文题目",
+      "pressed": "true",
+      "role": null
+    },
+    {
+      "txt": "英文题目",
+      "pressed": "false",
+      "role": null
+    }
+  ],
+  "groupRole": [
+    {
+      "cls": "sw",
+      "role": "group",
+      "label": "language"
+    },
+    {
+      "cls": "rail-group",
+      "role": null,
+      "label": null
+    },
+    {
+      "cls": "detents",
+      "role": null,
+      "label": null
+    },
+    {
+      "cls": "rail-group",
+      "role": null,
+      "label": null
+    },
+    {
+      "cls": "rail-group",
+      "role": null,
+      "label": null
+    },
+    {
+      "cls": "sw",
+      "role": "group",
+      "label": "排序"
+    },
+    {
+      "cls": "rail-group",
+      "role": null,
+      "label": null
+    },
+    {
+      "cls": "sw",
+      "role": "group",
+      "label": "格子大小"
+    },
+    {
+      "cls": "sw",
+      "role": "group",
+      "label": "只看有异常的"
+    },
+    {
+      "cls": "sw",
+      "role": "group",
+      "label": null
+    }
+  ],
+  "detents": [
+    {
+      "txt": "全部",
+      "pressed": "true"
+    },
+    {
+      "txt": "北方中转",
+      "pressed": "false"
+    },
+    {
+      "txt": "官方格式 · 长思考",
+      "pressed": "false"
+    }
+  ],
+  "foldSummaries": [
+    {
+      "txt": "本次运行单独设置",
+      "aria": null,
+      "tag": "SUMMARY"
+    }
+  ],
+  "checkboxes": [
+    {
+      "type": "checkbox",
+      "id": null,
+      "inLabel": true,
+      "labelText": "保存思考过程",
+      "aria": null
+    },
+    {
+      "type": "checkbox",
+      "id": null,
+      "inLabel": true,
+      "labelText": "保存完整原始响应",
+      "aria": null
+    }
+  ],
+  "inputs": [
+    {
+      "tag": "SELECT",
+      "type": "select-one",
+      "id": null,
+      "hasFor": false,
+      "inLabel": false,
+      "aria": "题目",
+      "prevLabel": null
+    },
+    {
+      "tag": "INPUT",
+      "type": "text",
+      "id": "o-model",
+      "hasFor": true,
+      "inLabel": false,
+      "aria": null,
+      "prevLabel": "改用模型名（留空用默认）"
+    },
+    {
+      "tag": "INPUT",
+      "type": "text",
+      "id": "o-temp",
+      "hasFor": true,
+      "inLabel": false,
+      "aria": null,
+      "prevLabel": "温度（本次）"
+    },
+    {
+      "tag": "INPUT",
+      "type": "text",
+      "id": "o-max",
+      "hasFor": true,
+      "inLabel": false,
+      "aria": null,
+      "prevLabel": "最大输出（本次）"
+    },
+    {
+      "tag": "INPUT",
+      "type": "text",
+      "id": "s-timeout",
+      "hasFor": true,
+      "inLabel": false,
+      "aria": null,
+      "prevLabel": "超时（秒）"
+    },
+    {
+      "tag": "INPUT",
+      "type": "text",
+      "id": "s-retries",
+      "hasFor": true,
+      "inLabel": false,
+      "aria": null,
+      "prevLabel": "重试次数"
+    }
+  ],
+  "imgs": [
+    {
+      "alt": "",
+      "hasAltAttr": true,
+      "loading": "lazy",
+      "decoding": "async",
+      "w": 264,
+      "h": 198,
+      "srcKind": "http://127.0"
+    },
+    {
+      "alt": "",
+      "hasAltAttr": true,
+      "loading": "lazy",
+      "decoding": "async",
+      "w": 264,
+      "h": 198,
+      "srcKind": "http://127.0"
+    },
+    {
+      "alt": "",
+      "hasAltAttr": true,
+      "loading": "lazy",
+      "decoding": "async",
+      "w": 264,
+      "h": 198,
+      "srcKind": "http://127.0"
+    },
+    {
+      "alt": "",
+      "hasAltAttr": true,
+      "loading": "lazy",
+      "decoding": "async",
+      "w": 264,
+      "h": 198,
+      "srcKind": "http://127.0"
+    }
+  ],
+  "imgCount": 20,
+  "imgEager": 0,
+  "iframeCount": 0,
+  "iframeAttrs": [],
+  "liveRegions": [],
+  "focusRing": {
+    "outlineStyle": "none",
+    "outlineWidth": "3px",
+    "outlineColor": "rgb(230, 227, 218)",
+    "outlineOffset": "0px"
+  },
+  "focusedTag": "BUTTON.ch",
+  "reducedMotionRule": true,
+  "docOverflowX": 0,
+  "scrollers": [
+    {
+      "cls": "rack-scroll",
+      "sh": 2532,
+      "ch": 757
+    },
+    {
+      "cls": "panel-scroll",
+      "sh": 959,
+      "ch": 900
+    }
+  ],
+  "tiny": [
+    {
+      "cls": "",
+      "w": 14,
+      "h": 14,
+      "txt": ""
+    },
+    {
+      "cls": "",
+      "w": 14,
+      "h": 14,
+      "txt": ""
+    }
+  ]
+}

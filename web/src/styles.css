@@ -1,0 +1,2764 @@
+/* ==========================================================================
+   动物骑单车测试台 — 仪器机架
+   视觉世界：哑光阳极氧化面板 + 工业丝印 + 琥珀指示灯
+   光只从灯里出来，不从边上漏。没有任何装饰性的边框、浮雕或投影。
+   ========================================================================== */
+
+/* -------------------------------------------------------------------------- */
+/* 字体：自托管，不依赖 CDN（这条链路要能打包成 exe 离线跑）                     */
+/* -------------------------------------------------------------------------- */
+
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+  src: url('/src/fonts/archivo-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+  src: url('/src/fonts/archivo-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Azeret Mono';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/src/fonts/azeret-mono-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Azeret Mono';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/src/fonts/azeret-mono-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 面板值                                                                      */
+/* -------------------------------------------------------------------------- */
+
+:root {
+  --room: #0c0c0b; /* 机架背后的房间 */
+  --panel: #191917; /* 哑光阳极氧化面板 */
+  --panel-hi: #21201d; /* 被手摸过、有点反光的面板 */
+  --well: #101010; /* 凹槽：读数窗、输入槽、开关底座 */
+  --engrave: #2d2c28; /* 刻线 */
+  --engrave-hi: #3d3a34; /* 刻线（提起时） */
+
+  /* 丝印三级。三级都必须过 4.5:1——这些字最小只有 9.5px，而它们印的
+     是「哪一次运行、哪一家、什么参数」，正是这个工具的全部结论。 */
+  --silk: #e6e3da; /* 主色 —— 对面板 12.6:1 */
+  --silk-dim: #a8a49a; /* 次级 —— 对面板 7.0:1 */
+  --silk-mute: #8f8c82; /* 刻线 —— 对面板 5.2:1 */
+
+  --lamp: #f0a020; /* 琥珀指示灯：默认世界里唯一饱和的颜色 */
+  --lamp-veil: rgba(240, 160, 32, 0.14);
+  --ok: #8faa62; /* 一路走完、没挂标签 */
+  --warn: #c8862f; /* 截断 / 非 SVG / 模型名不符 */
+  --fault: #e4643f; /* 请求失败 / 超时 / 渲染失败 */
+
+  --font-silk: 'Archivo', 'PingFang SC', 'Microsoft YaHei', 'Source Han Sans SC', 'Noto Sans SC', sans-serif;
+  /* 等宽栈里也要有汉字。原来这里没有，`第 26 条` 会掉到一个宽 14% 的系统字体上，
+     跟旁边丝印里的汉字长得不是一家人。 */
+  --font-read: 'Azeret Mono', ui-monospace, 'Cascadia Mono', Consolas, 'Microsoft YaHei', 'PingFang SC',
+    monospace;
+
+  /* 字级：六档，级差 ≥1px。原来全机架有十一个字号，相邻两档差 0.5px——
+     屏幕上分辨不出来，所谓层级其实是靠颜色在扛。 */
+  --t-micro: 10.5px; /* 小铭牌、通电格里的紧凑按钮 */
+  --t-label: 11px; /* 丝印：字段名、按钮、挡位、抽屉标题、机读小字 */
+  --t-sub: 12px; /* 次级：量化读数、次级名字、时间 */
+  --t-body: 14px; /* 正文：动物名、选项、说明句、段落标题、空态 */
+  --t-name: 15px; /* 铭牌 */
+  --t-address: 16px; /* 凹槽读数窗 */
+
+  /* 字距：只有四个值，每个都有理由。原来同一个「刻上去的大写标签」身份
+     在六个地方分别写着 0.11 / 0.12 / 0.13 / 0.15 / 0.16 / 0.17 / 0.19em，
+     那不是层级，是七次各调各的。
+     汉字一字正好一 em（实测：100px 下「保」= 100px），而字距加在每个字
+     后面——0.16em 会把「供应商」拆成三块互不相连的笔画，还平白占宽度。
+     所以字距跟着语言走。这是 :lang() 的活，不该让每个组件各自去改。 */
+  --track-label: 0.14em; /* 全部刻上去的大写拉丁标签：丝印、按钮、档位、字段名 */
+  --track-tag: 0.09em; /* 小铭牌：字号已经最小，再拉开就塞不进 132px 的格子 */
+  --track-head: 0.17em; /* 段落标题：最大的一档丝印，配得上多一点空气 */
+  /* 仪器编号（左上角铭牌）。和上面三档不同，它**不跟语言变**：那串大写拉丁
+     字是这台仪器的编号，不是句子（见下面 html:lang(zh) 那段）。原来铭牌借用了
+     --track-label，于是中文界面下它的字距被收到 0.04em —— 实测 0.6px，而这里
+     要的是 1.95px。缺的从来不是数值，是一个「不跟语言走」的名字。 */
+  --track-mark: 0.13em;
+
+  --rail-h: 54px;
+  /* 手指的最小落点。粗指针（触屏）下所有可点控件都不许比它矮——
+     这是「开关」这一族在手机上的高度，也是横杆收起来之后那一行的高度。 */
+  --switch-h: 44px;
+  /* 横杆收成摘要时那一行的高度。`.rack-band` 的粘性顶端要跟它对齐，
+     所以它必须是一个有名字的常数，不能在两处各写一个 44。 */
+  --rail-line-h: 44px;
+  /* 底部安全区。刘海机横屏时那一圈也可能在左右，见 .bench。 */
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+}
+
+/* 中文界面：排布不变，收回那份只为拉丁大写准备的字距。
+   铭牌（ANIMAL BIKE BENCH）和通道地址（R 2026-10-06）永远是大写拉丁记号，
+   它们不跟着变——那是这台仪器的编号，不是句子。 */
+html:lang(zh) {
+  --track-label: 0.04em;
+  --track-tag: 0.02em;
+  --track-head: 0.06em;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+html {
+  caret-color: var(--lamp);
+}
+
+body {
+  margin: 0;
+  background: var(--room);
+  color: var(--silk);
+  font-family: var(--font-silk);
+  font-variation-settings: 'wdth' 92;
+  font-size: var(--t-body);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* 浏览器自带的那一层也属于这个世界 */
+::selection {
+  background: var(--lamp);
+  color: #14130f;
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--engrave-hi) transparent;
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--engrave-hi);
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--silk-mute);
+  background-clip: content-box;
+}
+:focus-visible {
+  outline: 2px solid var(--lamp);
+  outline-offset: 2px;
+}
+a {
+  color: var(--silk);
+  text-decoration-color: var(--engrave-hi);
+  text-underline-offset: 0.18em;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 丝印字：面板上刻上去的字，全是窄体大写                                       */
+/* -------------------------------------------------------------------------- */
+
+.silk {
+  font-family: var(--font-silk);
+  font-variation-settings: 'wdth' 74;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--track-label);
+  font-size: var(--t-label);
+  color: var(--silk-mute);
+  white-space: nowrap;
+}
+.silk-hi {
+  color: var(--silk-dim);
+}
+/* 段落标题是丝印里最高的一档：比字段名大一档、窄一档、亮一档。
+   原来它和每一个字段名同字号、同宽度、同颜色——面板上三个标题没有身份，
+   和它们下面那十几个标签读起来是同一句话。 */
+.bay-head .silk {
+  font-variation-settings: 'wdth' 68;
+  font-size: var(--t-body);
+  letter-spacing: var(--track-head);
+  color: var(--silk);
+}
+/* 字号已经最小的一档丝印，用在空态和故障画面里：那里是一句要说给人听的话，
+   不是刻在面板上的一行标签，所以它得能折行。 */
+.silk-note {
+  white-space: normal;
+  text-wrap: balance;
+}
+
+/* 「供应商 · 模型名」这类标识串：不是刻上去的大写标签，也不是量化读数，
+   所以既不大写也不拉开——它只要老老实实念出自己是谁。 */
+.silk-plain {
+  font-family: var(--font-silk);
+  font-variation-settings: 'wdth' 92;
+  font-weight: 400;
+  font-size: var(--t-sub);
+  letter-spacing: 0.02em;
+  color: var(--silk-mute);
+  white-space: nowrap;
+}
+
+/* 用来把一行里的东西推到两端 */
+.spacer {
+  flex: 1;
+  min-width: 8px;
+}
+
+/* 读数：所有量化事实都走这里 */
+.read {
+  font-family: var(--font-read);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  font-size: var(--t-sub);
+  letter-spacing: 0.01em;
+}
+.read-lg {
+  font-family: var(--font-read);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 指示灯                                                                      */
+/* -------------------------------------------------------------------------- */
+
+.lamp {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+  background: #26251f;
+  box-shadow: inset 0 0 0 1px #000;
+}
+.lamp.ok {
+  background: var(--ok);
+  box-shadow:
+    0 0 5px rgba(143, 170, 98, 0.55),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.45);
+}
+.lamp.warn {
+  background: var(--warn);
+  box-shadow:
+    0 0 5px rgba(200, 134, 47, 0.6),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.45);
+}
+.lamp.fault {
+  background: var(--fault);
+  box-shadow:
+    0 0 5px rgba(228, 100, 63, 0.6),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.45);
+}
+.lamp.live {
+  background: var(--lamp);
+  box-shadow:
+    0 0 8px rgba(240, 160, 32, 0.7),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.4);
+  animation: lamp-strike 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* 这个世界唯一一个编排好的动作：灯丝亮起来 */
+@keyframes lamp-strike {
+  0% {
+    opacity: 0;
+    filter: blur(3px);
+    transform: scale(0.55);
+  }
+  42% {
+    opacity: 1;
+    filter: blur(1.1px);
+    transform: scale(1.08);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: scale(1);
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* 机架整体布局                                                                */
+/* -------------------------------------------------------------------------- */
+
+.bench {
+  display: grid;
+  /* 三块东西（总线条 / 控制台 / 机架）落在两列上：
+     第一行是总线条通栏，第二行左边机架、右边控制台。
+     DOM 顺序是「总线条、控制台、机架」——那是窄屏要的顺序（见 App.tsx），
+     宽屏这里用显式的区域名把它们摆回左右，不靠顺序。 */
+  grid-template-columns: minmax(0, 1fr) 348px;
+  grid-template-areas:
+    'bus bus'
+    'bay panel';
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100%;
+  background: var(--room);
+  /* 刘海机横屏时那一圈可能在左右两侧，整块台面往里让一步。 */
+  padding-left: var(--safe-l);
+  padding-right: var(--safe-r);
+  padding-bottom: var(--safe-b);
+}
+
+.busbar {
+  grid-area: bus;
+}
+.panel {
+  grid-area: panel;
+}
+
+.bay {
+  grid-area: bay;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.rack-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 顶部总线条                                                                  */
+/* -------------------------------------------------------------------------- */
+
+.busbar {
+  flex: none;
+  height: var(--rail-h);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 16px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--engrave);
+}
+
+/* 铭牌：这台仪器的编号牌。它和它右边那两个读数窗、语种开关是同一族的器物——
+   --well 凹槽、1px --engrave 刻线、inset 投影。改前它是透明底、无投影，只有一条
+   右边线，在总线条上读起来像一张贴纸（旁边全是有厚度的东西）。
+   高度是硬约束：总线条 54px，这块牌子实测 47.4px，上下各余 3px 左右。
+   所以内边距只能给 3px —— 想把它垫厚就得先跟总线条的高度要地方。 */
+.nameplate {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 3px 12px;
+  margin-right: 16px;
+  background: var(--well);
+  border: 1px solid var(--engrave);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.65);
+  min-width: 0;
+}
+.nameplate b {
+  font-family: var(--font-silk);
+  font-variation-settings: 'wdth' 68;
+  font-weight: 800;
+  font-size: var(--t-name);
+  line-height: 1.25;
+  /* 这里必须用 --track-mark，不能用 --track-label：后者在 html:lang(zh) 下被
+     收到 0.04em，而铭牌不跟语言变（本文件顶部两段注释都这么写着，DESIGN.md 的
+     字距条也是）。 */
+  letter-spacing: var(--track-mark);
+  text-transform: uppercase;
+  color: var(--silk);
+  white-space: nowrap;
+}
+/* 副行从「12px 的一句话」升格为「10.5px 的标签」：条上其他文字不是标签就是数字，
+   只有它原来是一句散文，挂在铭牌后面像脚注。现在它是丝印大写，
+   和上面那行之间用一条刻线分开，不再只靠 1px 的间距。 */
+.nameplate span {
+  margin-top: 3px;
+  padding-top: 3px;
+  border-top: 1px solid var(--engrave);
+  font-family: var(--font-silk);
+  font-weight: 700;
+  font-size: var(--t-micro);
+  line-height: 1.3;
+  letter-spacing: var(--track-tag);
+  text-transform: uppercase;
+  color: var(--silk-mute);
+  white-space: nowrap;
+}
+
+.busbar .spacer {
+  flex: 1;
+  min-width: 8px;
+}
+
+/* 总线条右端：正在测那一路的读数。指针走到哪一格，这里就报哪一格——
+   所以被跟踪的通道在网格、总线条、标本页三处同时被标记。 */
+.bus-track {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  min-width: 0;
+  border: 1px solid var(--engrave);
+  background: var(--well);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.65);
+}
+.bus-track[data-live='true'] {
+  border-color: var(--lamp);
+}
+.bus-track .addr {
+  font-family: var(--font-read);
+  font-size: var(--t-sub);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--silk);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.bus-track[data-live='true'] .addr {
+  color: var(--lamp);
+}
+.bus-track .who {
+  font-size: var(--t-sub);
+  color: var(--silk-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bus-track .who.dim {
+  color: var(--silk-mute);
+}
+.bus-track .read {
+  white-space: nowrap;
+}
+
+/* 凹槽里的读数窗 */
+.window {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  background: var(--well);
+  border: 1px solid var(--engrave);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.65);
+  padding: 4px 10px;
+  min-width: 0;
+}
+.window .read-lg {
+  font-size: var(--t-address);
+  color: var(--silk);
+}
+.window.hot .read-lg {
+  color: var(--lamp);
+}
+
+/* -------------------------------------------------------------------------- */
+/* 拨档开关（分段选择）—— 选中那档是陷进去的，不是亮起来的                       */
+/* -------------------------------------------------------------------------- */
+
+.sw {
+  display: inline-flex;
+  background: var(--well);
+  border: 1px solid var(--engrave);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+  flex: none;
+  /* 凹槽永远只比里面的挡位宽 2px（左右各 1px 刻线）。光靠 flex:none 不够：
+     在 .field 这种纵向 flex 里，flex-none 管的是主轴=高度，宽度是交叉轴，
+     仍会被 align-items:stretch 拉到整栏 315px，挡位挤在左边、右边空 181px。
+     用 fit-content 把宽度钉死在内容上，且不动 align-self——那样会把总线条
+     里垂直居中的拨档顶到上沿。 */
+  width: fit-content;
+}
+.sw > button {
+  appearance: none;
+  border: 0;
+  border-right: 1px solid var(--engrave);
+  background: transparent;
+  color: var(--silk-mute);
+  font-family: var(--font-silk);
+  font-variation-settings: 'wdth' 76;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--track-label);
+  font-size: var(--t-label);
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: color 0.14s ease-out;
+  white-space: nowrap;
+}
+.sw > button:last-child {
+  border-right: 0;
+}
+.sw > button:hover {
+  color: var(--silk-dim);
+}
+.sw > button[aria-pressed='true'] {
+  background: #0b0b0a;
+  color: var(--lamp);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.8),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+}
+/* Switch 的 disabled 态：目前没有任何一处会渲染它（`Switch` 的 props 里没有
+   disabled），但 DESIGN.md 要求每一个开关都给全 disabled 状态，所以这条留着 ——
+   只是把值改对。原来是 #4a4842，对 --well 只有 2.1:1，等于把「不能按」写成
+   「看不见」。退到 --silk-mute 就够：它本来就是丝印里最暗的一级，而
+   「不能按」另有 cursor 承担，不必再靠压暗字。 */
+.sw > button:disabled {
+  color: var(--silk-mute);
+  cursor: not-allowed;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 筛选横杆                                                                    */
+/* -------------------------------------------------------------------------- */
+
+/* 筛选横杆。宽屏上它就是一整排会折行的挡位；
+   窄屏上它收成一行（`.rail-line`），点开才放出全部条件（`.rail-full`）。 */
+.rail {
+  flex: none;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--panel);
+  border-bottom: 1px solid var(--engrave);
+}
+/* 摘要行：只在窄屏存在。宽屏把它整个收掉，看到的还是原来那条横杆。 */
+.rail-line {
+  display: none;
+}
+.rail-full {
+  display: block;
+}
+.rail-groups {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 8px 16px;
+}
+.rail-shown {
+  display: inline;
+}
+.rail-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.rail-sep {
+  width: 1px;
+  align-self: stretch;
+  background: var(--engrave);
+  margin: 2px 4px;
+  flex: none;
+}
+
+/* 状态筛选原来是一颗裸在 .rail-groups 里的 .sw —— 这一排唯一没有可见标签的组，
+   于是语义全压在选项文字上，逼出「只看有异常的」那 88.6px。现在它补上了标签、
+   和左邻四组一样挂进 .rail-group，标签把语义接了过去，选项就只剩两个汉字。
+   代价实测（1440，右栏 348px）：标签 22.9px + 组内 gap 8px 让整组到 163.6px，
+   而折行的第一行只剩 162.2px —— 差 1.4px 就折到第二行、横杆从 77px 长到 86px。
+   所以这里把选项内边距从 10 收到 8：每颗省 4px、三颗省 12px，整组 151.6px。
+   这是继 .effort-row 之后第二处收窄选项内边距的地方，两处都只为一个组。 */
+.rail-group.status-group .sw > button {
+  padding-inline: 8px;
+}
+
+/* 供应商挡位：一个档案一个位置。
+   用 1px 缝隙当分隔线（不是按钮的 border-right），所以折行之后每一段
+   依然是被刻开的，机器感不会因为换行就散掉。名字必须看得全——
+   要比较的就是「哪一家」，把名字截成「南…」等于把这个控件废掉。 */
+.detents {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+  background: var(--engrave);
+  border: 1px solid var(--engrave);
+  padding: 1px;
+  max-width: 100%;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+.detents > button {
+  appearance: none;
+  border: 0;
+  background: var(--well);
+  color: var(--silk-mute);
+  font-family: var(--font-silk);
+  font-variation-settings: 'wdth' 88;
+  font-size: var(--t-body);
+  padding: 5px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  max-width: 230px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.14s ease-out;
+}
+.detents > button:hover {
+  color: var(--silk-dim);
+}
+.detents > button[aria-pressed='true'] {
+  background: #0b0b0a;
+  color: var(--lamp);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.8),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* 题池选择：选项太多，老实用一个下拉，但把它做成面板上的槽 */
+select,
+input[type='text'],
+input[type='password'],
+input[type='number'],
+textarea {
+  appearance: none;
+  background: var(--well);
+  border: 1px solid var(--engrave);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+  color: var(--silk);
+  font-family: var(--font-silk);
+  font-variation-settings: 'wdth' 92;
+  font-size: var(--t-body);
+  padding: 6px 9px;
+  min-width: 0;
+  border-radius: 0;
+}
+select {
+  padding-right: 26px;
+  background-image: linear-gradient(45deg, transparent 50%, var(--silk-mute) 50%),
+    linear-gradient(135deg, var(--silk-mute) 50%, transparent 50%);
+  background-position:
+    calc(100% - 14px) calc(50% + 1px),
+    calc(100% - 9px) calc(50% + 1px);
+  background-size:
+    5px 5px,
+    5px 5px;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+select option {
+  background: var(--panel);
+  color: var(--silk);
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--silk-mute);
+}
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  border-color: var(--lamp);
+  outline: none;
+  box-shadow:
+    inset 0 1px 3px rgba(0, 0, 0, 0.6),
+    0 0 0 1px var(--lamp);
+}
+textarea {
+  font-family: var(--font-read);
+  font-size: var(--t-sub);
+  line-height: 1.6;
+  resize: vertical;
+}
+
+/* 模型名输入：一个自由文本字段 + 一张可筛的候选表。
+   候选表的内容来自 config.json 的 `modelPresets`（全局设置里那张「模型候选清单」
+   就是它的编辑面）。出厂值是 shared/types.ts 里的 DEFAULT_MODEL_PRESETS。
+   它仍然只是一张便签，不是事实记录：config 里没有「这一家提供哪些模型」这种东西 ——
+   这个工具问的正是「同一个模型名在不同站上表现如何」，所以模型名必须是手打的自由文本，
+   候选只是给手用的快捷键。改它不动任何一条记录，清空它也不挡任何一次运行。
+   网格用的是机架那套词汇：1px 的 --engrave 刻缝、单元格 --well、
+   选中态 #0b0b0a + --lamp + 9px 方点。输入即过滤（子序列匹配，
+   `dsr` 能命中 `deepseek-v3.2-reasoner-preview`）。
+   输入法：合成中的拼音（`sh`）仍然会被当成查询串去筛，组合期间照样出现
+   「没有候选匹配」—— 这一条不改，因为它是对的（你确实还没输完）。
+   真正会丢字的是**确认**那一下：中文输入法里敲回车是「选这个词」，
+   而回车在这里是「提交这一行」。所以键盘处理的第一句就是
+   `if (e.nativeEvent.isComposing) return;` —— 组合期间的回车不归我们管，
+   归输入法。（`web/src/components/ControlPanel.tsx` 的 PresetRow 与候选表两处同一条守卫。） */
+.model-pick {
+  /* 这张表里三个会重复出现的常数，各给一个名字：
+     行高、回执条高、以及「几行之后开始滚」。
+     改行高时不必再去数哪里还写着一个 28 —— 上限是从这里算出来的，
+     不是抄来的。（手指那一档只换 `--mp-rows` 与 `--mp-row-h`，见文件末尾的
+     `(pointer: coarse)` 块。） */
+  --mp-row-h: 28px;
+  --mp-foot-h: 20px;
+  --mp-rows: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+/* 输入框与「清除」共用一条 1px 刻缝：缝是容器的 --engrave 底色透出来的。 */
+.model-pick .mp-row {
+  display: flex;
+  align-items: stretch;
+  gap: 1px;
+  background: var(--engrave);
+}
+.model-pick .mp-row .mp-input {
+  flex: 1;
+  min-width: 0;
+}
+.model-pick .mp-clear {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 29px;
+  padding: 0;
+  border: 0;
+  background: var(--well);
+  cursor: pointer;
+}
+/* 焦点环内缩 1px：全局那圈外扩 2px 的环会压到下面表格的顶边，
+   而这个世界里正统的选中写法就是内缩（DESIGN.md:312）。 */
+.model-pick .mp-clear:focus-visible {
+  outline: 1px solid var(--lamp);
+  outline-offset: -1px;
+}
+.model-pick .mp-clear:hover:not(:disabled) {
+  background: var(--panel);
+}
+.model-pick .mp-clear:disabled {
+  cursor: not-allowed;
+}
+/* 叉是画出来的，不是打出来的字 —— 这个站里没有 Unicode 图标。 */
+.model-pick .mp-x {
+  position: relative;
+  width: 9px;
+  height: 9px;
+}
+.model-pick .mp-x::before,
+.model-pick .mp-x::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 0;
+  width: 9px;
+  height: 1px;
+  background: var(--silk-dim);
+}
+.model-pick .mp-x::before {
+  transform: rotate(45deg);
+}
+.model-pick .mp-x::after {
+  transform: rotate(-45deg);
+}
+.model-pick .mp-clear:hover:not(:disabled) .mp-x::before,
+.model-pick .mp-clear:hover:not(:disabled) .mp-x::after {
+  background: var(--silk);
+}
+.model-pick .mp-clear:disabled .mp-x::before,
+.model-pick .mp-clear:disabled .mp-x::after {
+  background: var(--engrave-hi);
+}
+/* 空态盖在槽位上，所以需要一个定位上下文。 */
+.model-pick .mp-well {
+  position: relative;
+}
+/* 槽位是这一块的外框：凹槽底色、1px 刻线、内阴影都在它身上。表自己不再画框 ——
+   它现在只围住行，而回执条要贴在框里、不跟着滚。
+   高度按内容收（候选少就矮），上限是常数五行：超过五行才出滚动条。
+   代价写在明处 —— 表高随候选数变，所以「开始生成」会跟着走（实测 1 行 → 5 行
+   之间 112px）。原先那张定高表是为了钉住瞄准点，现在拿它换掉了常驻的空带：
+   空带每天都在看，位移只发生在改清单和打字的那一下。
+   槽高 = --mp-rows × --mp-row-h + --mp-foot-h + 2(上下边框)。 */
+.model-pick .mp-slot {
+  display: flex;
+  flex-direction: column;
+  max-block-size: calc(var(--mp-rows) * var(--mp-row-h) + var(--mp-foot-h) + 2px);
+  background: var(--well);
+  border: 1px solid var(--engrave);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+.model-pick .mp-grid {
+  display: grid;
+  /* 单列网格不是为了排版，是为了让每行铺满：<button> 的 width:auto 是
+     fit-content 而不是 fill-available，只有网格列会把它拉开。
+     minmax(0,1fr) 里的 0 还得留着 —— 名字比槽宽时长串要能收成省略号。 */
+  grid-template-columns: minmax(0, 1fr);
+  /* 槽位已经按内容定高，这一条只是兜底：万一以后有人给槽位写死高度，
+     只剩一行时那一行也不会被拉满。 */
+  align-content: start;
+  flex: 0 1 auto;
+  overflow-y: auto;
+  /* 全站唯一会出现滚动条的地方：到第 --mp-rows + 1 行才滚。 */
+  max-block-size: calc(var(--mp-rows) * var(--mp-row-h));
+}
+/* 一个候选都没有时表会塌成 0 高，而空态那句话是绝对定位的 —— 得给它留一块
+   地方印（英文那句要两行）。 */
+.model-pick .mp-grid[data-empty='true'] {
+  min-block-size: 64px;
+}
+/* 回执条：把「这里为什么空着」直接印出来 —— 没有这个数，剩下的一片 --well
+   只能读成「没存上」。它固定 --mp-foot-h、不参与滚动，所以条数在变，
+   这条回执不变高。 */
+.model-pick .mp-foot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  block-size: var(--mp-foot-h);
+  padding-inline: 8px;
+  border-block-start: 1px solid var(--engrave);
+  font-family: var(--font-silk);
+  font-size: var(--t-label);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--silk-mute);
+}
+.model-pick .mp-cell {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  /* 行高是这张表的封顶算式的乘数，所以写在这里、不靠 5+18+5 碰巧凑出来。
+     手指那一档把 --mp-row-h 换成 --switch-h，这里不用另写一条。 */
+  block-size: var(--mp-row-h);
+  padding: 5px 8px;
+  border: 0;
+  background: var(--well);
+  color: var(--silk-dim);
+  font-family: var(--font-read);
+  font-size: var(--t-sub);
+  font-weight: 400;
+  line-height: 18px;
+  font-variation-settings: normal;
+  text-align: left;
+  cursor: pointer;
+}
+/* 行与行之间的 1px 刻缝。用 inset 阴影而不是 gap：gap 要靠容器的 --engrave
+   底色透出来，而表格定高之后，最后一行下面那一大片空白也会跟着变成 --engrave。
+   阴影画在格子自己身上，空出来的地方就还是 --well。 */
+.model-pick .mp-cell + .mp-cell {
+  box-shadow: inset 0 1px 0 var(--engrave);
+}
+.model-pick .mp-cell:hover {
+  background: var(--panel);
+  color: var(--silk);
+}
+.model-pick .mp-cell[aria-selected='true'] {
+  background: #0b0b0a;
+  color: var(--lamp);
+}
+/* 键盘游标：aria-activedescendant 指着的那一行（data-active），
+   以及真的拿到焦点的那一行。环必须**内缩**：外扩的 2px 环会被 .mp-grid 的
+   overflow 把左右两边裁掉，只剩上下两条细线 —— 键盘用户等于看不见自己在哪。
+   站内本来就有一处正确写法（.ch[data-tracked='true']）。 */
+.model-pick .mp-cell[data-active='true'],
+.model-pick .mp-cell:focus-visible {
+  outline: 1px solid var(--lamp);
+  outline-offset: -1px;
+}
+.model-pick .mp-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.model-pick .mp-dot {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border: 1px solid var(--engrave-hi);
+  background: var(--well);
+}
+.model-pick .mp-cell[aria-selected='true'] .mp-dot {
+  border-color: var(--lamp);
+}
+.model-pick .mp-cell[aria-selected='true'] .mp-dot::after {
+  content: '';
+  display: block;
+  width: 5px;
+  height: 5px;
+  margin: 1px;
+  background: var(--lamp);
+  box-shadow: 0 0 4px rgba(240, 160, 32, 0.7);
+}
+/* 空态是一句 Note（正文角色），不是一行路径 —— 所以不用等宽、用 --t-body。
+   原来它是 12px 等宽坐在 --engrave 上（4.15:1，没过正文 4.5:1）。
+   现在底是槽位自己的 --well，字是 --silk-mute：5.7:1。
+   底下让出 --mp-foot-h —— 那一条是回执条，这句话不许压在上面。
+   **它不是 live region**：条数由回执条播报（见下），这一句是随屏可读的静态文字。
+   两个活区同时改口，读屏会连着念两遍同一件事。 */
+.model-pick .mp-empty {
+  position: absolute;
+  inset: 0 0 var(--mp-foot-h) 0;
+  padding: 8px;
+  color: var(--silk-mute);
+  font-size: var(--t-body);
+  line-height: 1.5;
+  text-wrap: pretty;
+  pointer-events: none;
+}
+/* 这里原来有一个屏外的播报格 `.mp-count`（position:absolute; left:-10000px）。
+   删它的理由不是「不该播报」，而是「播报的和看见的不是同一处」：条数是这张表
+   唯一会随打字变化的反馈，它必须既能看见、又能听见。
+   所以现在 `role="status"` 挂在回执条那句话上（`ControlPanel.tsx` 的 `.mp-foot`）：
+   一个活区、在明面上、说的就是眼睛看到的那个数。 */
+
+/* -------------------------------------------------------------------------- */
+/* 机架与通道格                                                                */
+/* -------------------------------------------------------------------------- */
+
+.rack {
+  --ch-min: 220px;
+  padding: 0 0 40px;
+}
+.rack[data-size='s'] {
+  --ch-min: 148px;
+}
+.rack[data-size='m'] {
+  --ch-min: 220px;
+}
+.rack[data-size='l'] {
+  --ch-min: 320px;
+}
+
+.rack-band {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 16px 8px;
+  position: sticky;
+  top: 0;
+  background: linear-gradient(var(--room) 72%, rgba(12, 12, 11, 0));
+  z-index: 3;
+}
+.rack-band .rule {
+  flex: 1;
+  height: 1px;
+  background: var(--engrave);
+  min-width: 12px;
+}
+.rack-band .addr {
+  font-family: var(--font-read);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--silk-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.rack-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--ch-min), 1fr));
+  gap: 0;
+  margin: 0 16px;
+  border-top: 1px solid var(--engrave);
+  border-left: 1px solid var(--engrave);
+}
+
+/* 一个通道 = 面板上的一格。它是机架的一格，不是一张浮起来的卡片。
+   行高靠两件事保持整齐：画面固定 4:3，铭牌槽位固定一行高。
+   两者都是常数，所以整面机架每一格一样高——截出来的图像一张真的机架，
+   而不是一堆高矮不一的卡片。 */
+.ch {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  background: var(--panel);
+  border: 0;
+  border-right: 1px solid var(--engrave);
+  border-bottom: 1px solid var(--engrave);
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  transition: background 0.15s ease-out;
+  min-width: 0;
+}
+.ch:hover {
+  background: var(--panel-hi);
+}
+.ch:hover .ch-plate {
+  background: rgba(255, 255, 255, 0.014);
+}
+.ch[data-tracked='true'] {
+  background: var(--panel-hi);
+  outline: 1px solid var(--lamp);
+  outline-offset: -1px;
+  z-index: 2;
+}
+
+/* 左上角指示灯，右上角通道地址——一格单独被截走时，这一行就是它的编号。 */
+.ch-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 9px 5px;
+  min-width: 0;
+}
+.ch-no {
+  font-family: var(--font-read);
+  font-size: var(--t-sub);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--silk);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ch-head .spacer {
+  flex: 1;
+  min-width: 4px;
+}
+.ch-dur {
+  font-family: var(--font-read);
+  font-size: var(--t-label);
+  color: var(--silk-mute);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* 作品原样放在这里：不加底色、不裁切、不套框。
+   4:3 是常数，所以同一列里每一格的画面大小完全一致——失败的格子和成功的
+   格子一样大，不会因为「没有图」就显得矮一截或者小一圈。 */
+.ch-plate {
+  flex: none;
+  aspect-ratio: 4 / 3;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: transparent;
+}
+.ch-plate img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.ch-silk {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px 9px 9px;
+  border-top: 1px solid var(--engrave);
+  min-width: 0;
+}
+/* 格子里的四行读作一条由重到轻的链：画的是什么 → 哪一路中转 → 哪个模型 → 什么时候。
+   字号 14 / 12 / 11 / 11，色阶 silk / silk-dim / silk-mute / silk-mute，族 Archivo→Mono。
+   权重在这条链上帮不上忙：汉字只有常规和粗体两档，600 落在汉字上是空转
+   （实测雅黑 400 与 700 的墨量完全相同），所以层级只能靠字号、色阶、字族来扛。 */
+.ch-animal {
+  font-size: var(--t-body);
+  font-weight: 600;
+  font-variation-settings: 'wdth' 92;
+  color: var(--silk);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ch-prov {
+  font-size: var(--t-sub);
+  color: var(--silk-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ch-model {
+  font-family: var(--font-read);
+  font-size: var(--t-label);
+  color: var(--silk-mute);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+/* 「什么时候」和通道号一样是这格的坐标。单独截一格发出去时，
+   上面那行 R 2026-10-06 的机架带不会被一起截走，所以日期必须长在格子里。 */
+.ch-when {
+  font-family: var(--font-read);
+  font-size: var(--t-label);
+  color: var(--silk-mute);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 标签：陈述事实，不打分。不是药丸，是刻在面板上的小铭牌。
+   槽位永远留着（哪怕这条记录一个标记都没有），这样有标记的格子和没标记的
+   格子一样高——机架的行高不能因为「这一家恰好没出错」就变矮。 */
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 5px;
+  min-height: 19px;
+  align-content: flex-start;
+}
+.tag {
+  font-family: var(--font-silk);
+  font-variation-settings: 'wdth' 76;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--track-tag);
+  font-size: var(--t-micro);
+  /* 13px 行高 + 上下各 2px 内衬 + 上下各 1px 刻线 = 19px，正好填满槽位。
+     槽位高度是常数，机架的行高才是常数。 */
+  line-height: 13px;
+  padding: 2px 5px;
+  border: 1px solid currentColor;
+  color: var(--warn);
+  white-space: nowrap;
+}
+.tag.fault {
+  color: var(--fault);
+}
+
+/* 渲染不出来时，格子照旧占位。空画面是这个工具能拿到的最坏结果，
+   所以它不能是屏幕上最安静的那一格。
+   底色跟着事实走：「浏览器渲染失败」是真出事（红），「模型压根没给 SVG」
+   和「截断了」是琥珀——画面、指示灯、铭牌三处同色，一格之内不自相矛盾。 */
+.broken {
+  display: grid;
+  place-items: center;
+  gap: 6px;
+  width: 100%;
+  height: 100%;
+  padding: 12px;
+  text-align: center;
+  color: var(--warn);
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(200, 134, 47, 0.11) 0 7px,
+    transparent 7px 14px
+  );
+}
+.broken.fault {
+  color: var(--fault);
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(228, 100, 63, 0.11) 0 7px,
+    transparent 7px 14px
+  );
+}
+/* .silk / .note 自带颜色，会把故障色盖掉——这里显式继承，让空画面说自己的话 */
+.broken .silk,
+.broken .note,
+.broken .read {
+  color: inherit;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 通电中的通道：占两格，流式输出就在格子里                                    */
+/* -------------------------------------------------------------------------- */
+
+.ch.live {
+  grid-column: span 2;
+  cursor: default;
+  background: var(--panel-hi);
+  outline: 1px solid var(--lamp);
+  outline-offset: -1px;
+  z-index: 2;
+}
+@media (max-width: 700px) {
+  .ch.live {
+    grid-column: span 1;
+  }
+}
+
+.live-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+.prompt-line {
+  padding: 0 10px 9px;
+  font-size: var(--t-body);
+  line-height: 1.5;
+  color: var(--silk-dim);
+  border-bottom: 1px solid var(--engrave);
+}
+.prompt-line b {
+  display: block;
+  margin-bottom: 3px;
+  white-space: normal;
+}
+
+.stream {
+  font-family: var(--font-read);
+  font-size: var(--t-sub);
+  line-height: 1.62;
+  color: var(--silk-dim);
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow: auto;
+  max-height: 300px;
+  padding: 8px 10px;
+  background: var(--well);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+  margin: 8px 10px 10px;
+}
+.stream.reasoning {
+  color: #8a7f68;
+  border-left: 0;
+}
+.stream-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px 0;
+}
+.stream-head .rule {
+  flex: 1;
+  height: 1px;
+  background: var(--engrave);
+}
+
+/* -------------------------------------------------------------------------- */
+/* 右侧控制面板                                                                */
+/* -------------------------------------------------------------------------- */
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--panel);
+  border-left: 1px solid var(--engrave);
+}
+.panel-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.bay-section {
+  padding: 14px 16px 18px;
+  border-bottom: 1px solid var(--engrave);
+  /* 粘住的供应商标题行要横着盖满整幅宽（见窄屏档的 `.prov-head`），
+     所以它得知道自己父级的左右内边距是多少。放在这里是因为**只有一个源**：
+     内边距改了、这个变量跟着改，两边不会各写一个数然后走散。 */
+  --section-pad: 16px;
+}
+.bay-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 11px;
+}
+.bay-head .rule {
+  flex: 1;
+  height: 1px;
+  background: var(--engrave);
+}
+
+/* 供应商这一节的回执：保存 / 删除之后，就在标题行里、「新建」键的左边说话。
+   它常驻在树里（没话可说的时候是一段空白），宽度按最长的那个词留死 ——
+   于是刻线长度恒定，回执来去都不会让这一行抽动一下。
+   52px = 实测 `DELETED` 在丝印 11px / wdth 74 / 0.14em 下的 51.25px 向上取整，
+   中文「已删除」「已保存」都是 37.63px —— 中英切换时刻线一动不动。
+   这一颗绿是 --ok 第一次当文字色用：DESIGN.md:210 把它指派给通道格那颗 7px 小灯，
+   但它的两个兄弟早就当过文字色（--warn 在 .tag、--fault 在 .btn.halt），
+   所以这是按既有规则扩展，不是破例。对 --panel 实算 6.79:1，过 4.5:1。 */
+.prov-receipt {
+  /* flex:none 原来让这一格只进不退：回执一长就把同一行的「新建」推出去。
+     实测一段长中文回执量到 434.7px，而它自己只有 52px 的位子。
+     改成可收 + 省略号：短回执照旧占住 52px（中英切换时刻线不动），
+     长回执在自己这一格内截断，不再推别人。 */
+  flex: 0 1 auto;
+  min-width: 52px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: var(--font-silk);
+  font-variation-settings: 'wdth' 74;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--track-label);
+  font-size: var(--t-label);
+  color: var(--ok);
+  white-space: nowrap;
+}
+
+/* 长句子（「接口地址必须填写」、接口报回来的错）不塞进那一行：标题行是丝印，
+   一句话会把它撑成两行、把刻线挤没。照 DESIGN.md:324 给「删除后果说明」立的那条
+   先例另起一行，同样是 p.note[role="status"]、同样不播入场动画。
+   双类选择器是为了盖过 .note 自己的 color：两者同为 (0,1,0)，
+   而 .note 写在文件更后面，靠源序会输。 */
+.note.prov-receipt-note {
+  color: var(--fault);
+  max-width: 62ch;
+}
+/* 空的时候必须收掉：常驻的是「一段空白 + 一个边框」，
+   不收就是一个浮在那里的空框。 */
+.prov-receipt-note:empty {
+  display: none;
+}
+
+/* 档案名册：一行一个工位 */
+.roster {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--engrave);
+  background: var(--well);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+.slot {
+  display: flex;
+  /* 顶端对齐而不是居中。铭牌现在是三行，行数会随主机名长度变；居中会让
+     领衔的那一行每换一家就上下跳一次。 */
+  align-items: flex-start;
+  gap: 9px;
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--engrave);
+  cursor: pointer;
+  background: transparent;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  width: 100%;
+  transition: background 0.14s ease-out;
+}
+.slot:last-child {
+  border-bottom: 0;
+}
+.slot:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+.slot[aria-pressed='true'] {
+  background: #0a0a09;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.75);
+}
+.slot-body {
+  flex: 1;
+  min-width: 0;
+  display: block;
+}
+/* 铭牌是三个寄存器：主机名领衔、工位名做标签、参数殿后。
+   为什么主机名领衔：实测原版的层级是反的 —— `.slot-name` 的行盒 21px，
+   `.slot-sub` 31.9px，脚注比名字大 1.52 倍。而「这一家到底往哪儿发」的答案
+   是主机名，工位名是你自己随手起的，它区分的是你自己，不是这家供应商。 */
+.slot-host {
+  display: block;
+  font-family: var(--font-silk);
+  font-size: var(--t-name);
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.005em;
+  color: var(--silk);
+  font-variation-settings: 'wdth' 92;
+  /* 主机名可能很长（自建网关常见）。不许截断，放不下就长一行。 */
+  overflow-wrap: anywhere;
+}
+.slot[aria-pressed='true'] .slot-host {
+  color: var(--lamp);
+}
+/* 工位名降成标签，靠尺寸拉开档位而不是靠字重 —— 汉字没有字重。
+   10.5px 是主机名 15px 的 0.7 倍。 */
+.slot-name {
+  display: block;
+  font-family: var(--font-silk);
+  font-size: var(--t-micro);
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--silk-mute);
+  font-variation-settings: 'wdth' 82;
+  margin-top: 2px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+/* 参数行。这里主动从 Azeret Mono 换成了 Archivo 的 tabular figures ——
+   等宽字族的角色是「量化事实」，而这一行混着主机名与协议这样的词，
+   本来就该由正文字族承担（The Mono-Is-Not-Costume Rule）。
+   数字仍然对齐，靠的是 font-variant-numeric，不是字族。
+   参数串可以很长，实测 `deepseek-v3.2-reasoner-preview · OI · T=0.7 ·
+   TOPP=0.95 · MAX=32768` 在 348px 栏里超出 151px，收到 10.5px 仍超出
+   129px —— 缩字号救不回来，所以这里允许折行。 */
+.slot-sub {
+  display: block;
+  font-family: var(--font-silk);
+  font-size: var(--t-label);
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  color: var(--silk-mute);
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+  margin-top: 3px;
+}
+
+/* 名册下面这条槽。平时露的是「编辑 / 删除」两颗按钮；按下「新建」或
+   「编辑供应商」之后，按钮沉进槽底，表单从同一条槽的上沿压下来。
+   两块同格同位、朝同一个方向接力：按钮先让位，纸随即落下。
+   这样下面的「本次运行」只被推一次，不会被先顶上去一截再推下来。
+   两块都得常驻在树里才有「关」可演：条件卸载只演得了开，演不了高度收回去那一程。
+   用的是和 `.fold` 同一套机制（`interpolate-size` + `block-size`），
+   所以这一台仪器里只有一种「抽屉」的读感，没有第二套。 */
+.prov-slot {
+  /* 两块装进同一条轨道。槽口只认一条上沿，分开陈列是错的 ——
+     上下摊开的话，上面那块缩高会把下面这块整体往上拽 43px，
+     于是「盒子往下展开、内容往上走」两个方向同时在演，眼睛读到的就是散的。
+     叠进同一个格子之后，表单的上沿从第一帧起就钉在槽口上，盒子只往下长。 */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  /* `block-size: auto` 默认不可插值。这是继承属性，声明在槽上，
+     两个 wrapper 就都拿得到——不必为了一个表单把整份文档的尺寸插值全打开。 */
+  interpolate-size: allow-keywords;
+}
+.prov-slot-out,
+.prov-slot-in {
+  /* 同格同层，并且各自按自己的高度顶在格子的上沿 —— 默认的 stretch
+     会把两块都撑成格高，高度过渡当场失效。格子高 = 两块里高的那块。 */
+  grid-area: 1 / 1;
+  align-self: start;
+  overflow: clip;
+  transition:
+    block-size 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    visibility 0.18s;
+  /* 焦点圈是 2px 圈 + 2px 偏移，画在盒子外面。盒子的边正好是裁切边，
+     所以把裁切区放大一点，别把唯一的焦点提示裁掉。它不参与布局。 */
+  overflow-clip-margin: 10px;
+}
+/* 两侧在「关」这件事上不是对称的，不能被同一条规则概括：
+   收起时按钮要露、表单要藏；展开时反过来。所以 visibility 分开写，
+   谁被藏起来就写谁——写错一边的后果是那一边在常态下整块消失。
+   visibility 按步插值：整段过渡里它都还是 visible，只在最后一刻翻过去，
+   所以藏起来的过程不会半路突然消失。这也顺手把「关着的表单不进 Tab 序列」
+   这条原本由条件卸载免费提供的行为补了回来。 */
+.prov-slot-out {
+  block-size: auto;
+  visibility: visible;
+  /* 挡住里面那个 margin-top 穿出去。穿出去的话槽高就算不准，
+     按钮会在展开态被下沿切掉一截。 */
+  display: flow-root;
+}
+.prov-slot-in {
+  block-size: 0;
+  visibility: hidden;
+}
+.prov-slot.open .prov-slot-out,
+.prov-slot.open .prov-slot-in {
+  transition-duration: 0.26s;
+}
+.prov-slot.open .prov-slot-out {
+  block-size: 0;
+  visibility: hidden;
+}
+.prov-slot.open .prov-slot-in {
+  block-size: auto;
+  visibility: visible;
+}
+
+/* 内容不跟着盒子一起淡：盒子是槽口，内容是那页纸。
+   表单从槽口**上沿**往下落到位，按钮朝同一个方向沉回槽里 ——
+   两块同向，眼睛读到的才是同一张纸在往下抽；两块反向会读成
+   「下面那块在顶上来」，盒子的展开方向就被抵消掉了。
+   同向还不够：两块同格同位，一块淡出、一块淡入，交叠的那几帧
+   会互相穿透（中途停一帧能同时读到「编辑供应商」和它底下的「名称」）。
+   所以下面按方向各排一次先后 —— 过渡取的是**终态**那条规则里的时长，
+   展开与收起两条路必须分开写。 */
+.prov-form {
+  padding-top: 12px; /* 原来挂在行内 style 上的 marginTop，收进样式表 */
+  opacity: 0;
+  /* 负值 = 起始位置在落点上方。内容是「从上面落下来」的，
+     所以它必须从一个比 0 更小的 y 出发 —— 正数会让它从下方顶上来。 */
+  transform: translateY(-6px);
+  transition:
+    opacity 0.14s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.14s cubic-bezier(0.16, 1, 0.3, 1);
+}
+/* 收起时：表单先撤，按钮后回。延迟挂在**目的地**状态上 ——
+   过渡用的是终态那条规则里的时间，所以这一条管的是「走向收起」那一程。 */
+.prov-slot-out > .row {
+  transition:
+    opacity 0.12s cubic-bezier(0.16, 1, 0.3, 1) 0.06s,
+    transform 0.12s cubic-bezier(0.16, 1, 0.3, 1) 0.06s;
+}
+.prov-slot.open .prov-form {
+  opacity: 1;
+  transform: translateY(0);
+  /* 两块现在叠在同一个格子里，同一瞬间显形就会互相穿透 ——
+     中途停一帧能同时读到「编辑供应商」和它底下的「名称」，是糊的。
+     所以排先后：按钮 0.12s 让开，表单等 0.08s 再落。交接处只叠 40ms，
+     眼睛读到的是「按钮沉下去、纸压上来」一件事，不是两块布各演各的。
+     表单收在 0.08 + 0.18 = 0.26s，正好和槽口长到位的时刻重合 ——
+     内容落定的那一帧，盒子也刚好停住。 */
+  transition:
+    opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1) 0.08s,
+    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1) 0.08s;
+}
+.prov-slot.open .prov-slot-out > .row {
+  opacity: 0;
+  /* 正值 = 退出方向朝下，与表单落下来的方向一致。原来这里是 -5px：
+     按钮一边淡出一边往上跑，和往下降的表单迎面撞上，
+     整段动画看起来像两块各演各的（这就是「不协调」的来源）。 */
+  transform: translateY(5px);
+  /* 展开时不等：先把位置让出来。延迟只留给收起那一程。 */
+  transition:
+    opacity 0.12s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* 面板上的按钮：按下去有行程 */
+.btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-family: var(--font-silk);
+  font-variation-settings: 'wdth' 82;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--track-label);
+  font-size: var(--t-label);
+  padding: 8px 12px;
+  color: var(--silk-dim);
+  background: var(--panel-hi);
+  border: 1px solid var(--engrave-hi);
+  box-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.055);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 0.14s ease-out,
+    color 0.14s ease-out;
+}
+.btn:hover:not(:disabled) {
+  color: var(--silk);
+  background: #262521;
+}
+.btn:active:not(:disabled) {
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8);
+  transform: translateY(1px);
+}
+/* 按不下去的键：字退到丝印最暗的那一级（--silk-mute，对 --panel 5.2:1），
+   同时把「升起」这件事整个撤掉 —— 底回到 --panel、刻线退回 --engrave、
+   投影归零。状态由「平不平」承担，不再由「看不清」承担。
+   原来这里写的是 #4d4b45：对 --panel-hi 只有 1.9:1。默认首屏（档案里没有
+   模型名）那颗「开始生成」正是这一态 —— 它是这一屏唯一的主操作，却几乎
+   只剩一个空框，字要先凑近看才认得出。
+   三档丝印全部 ≥4.5:1 是这台仪器的规矩，disabled 不是逃出这条规矩的许可证。 */
+.btn:disabled {
+  color: var(--silk-mute);
+  background: var(--panel);
+  border-color: var(--engrave);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.btn.quiet {
+  background: transparent;
+  border-color: var(--engrave);
+  box-shadow: none;
+}
+.btn.quiet:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--silk);
+}
+/* 扣下去的键：这台仪器里「开着」只有一种读法 —— 键座沉进去。
+   通电格输出流头上那颗「自动滚动」是两态的（`aria-pressed` 早就挂在
+   LiveBay 的按钮上），但样式表里原先没有任何 `.btn[aria-pressed='true']`
+   规则，于是开与关是同一张脸 —— 「我正在替你贴着底滚」这件事在屏幕上
+   不存在，只能靠滚一下试试来反推。
+   照 `.sw` / `.detents` 的选中态抄，不改一个值：底沉进 `#0b0b0a`、
+   字转琥珀、加真凹槽。**不发光、不铺面积、不放大、不加粗** —— 与
+   `.sw` / `.detents` / `.slot` / `.halt.armed` 是同一句话。
+   1px 边保持 `.quiet` 原来的 `--engrave`：选中不改尺寸，也不换轮廓。
+   这里**刻意不加 transition**：底与字沿用 `.btn` 自带的 0.14s，凹槽瞬时落位
+   —— 与 `.sw > button` 一样（它也只过渡 color，凹槽是瞬间的）。
+   hover 那一档必须一起写死：`.btn.quiet:hover:not(:disabled)` 与本规则同分，
+   不写就变成由源码顺序决定胜负，太脆。:not(:disabled) 照 `.arm` / `.halt`
+   的规矩 —— 一盏亮在断路上的灯不成立。 */
+/* `:not(.halt)` 是补上来的。这一条是给**两态开关**写的（LiveBay 那颗
+   「自动滚动」）：按下去 = 开着，所以字转琥珀、底沉进 #0b0b0a。
+   可它同时也吃掉了闩扣 —— `.btn.quiet[aria-pressed='true']:not(:disabled)`
+   是 (0,4,0)，而 `.btn.halt.armed` 只有 (0,3,0)，于是「删除」扣下闩之后
+   字变成琥珀 `--lamp`、底变成 `#0b0b0a`，`.halt.armed` 里写的那两个值
+   （`--fault` / `#241512`）一次都没生效过，只有边框侥幸对了。
+   这正是下面 .btn.halt 那段注释在骂的事，只是方向反过来：**不是故障橙
+   借给了 disabled，是琥珀借走了故障橙。**
+   闩扣不是开关 —— 它没有「开着」这一态，它只有「已经扣下」。所以它不归
+   这一条管，用一个 `:not(.halt)` 把它请出去，`.halt.armed` 才第一次
+   真的说了算。 */
+.btn.quiet[aria-pressed='true']:not(:disabled):not(.halt),
+.btn.quiet[aria-pressed='true']:hover:not(:disabled):not(.halt) {
+  background: #0b0b0a;
+  color: var(--lamp);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.8),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+}
+.btn.wide {
+  width: 100%;
+}
+/* 琥珀只留给「能按」的那一态。原来 `.btn.arm` 和 `.btn:disabled` 同为 (0,2,0)，
+   而 `.btn.arm` 写在后面 —— 于是按不下去的「开始生成」和能按的那一颗，
+   color / border-color / background / opacity 逐项完全相同，只差一个 cursor。
+   一盏亮在断路上的灯。
+   下面 `.btn.halt` 是同一条规矩的另一半：它同样写在 `.btn:disabled` 后面、
+   同样是 (0,2,0)，于是「删除供应商」在 `busy` 时字和刻线仍然是故障橙 ——
+   一颗按不动却红着的键。红的含义在这台仪器里是确定的（真出事了），
+   不能让一个 disabled 状态借走它。 */
+.btn.arm:not(:disabled) {
+  color: var(--lamp);
+  border-color: #5a4520;
+}
+.btn.arm:hover:not(:disabled) {
+  background: #241d10;
+  color: var(--lamp);
+}
+.btn.halt:not(:disabled) {
+  color: var(--fault);
+  border-color: #5a2f22;
+  /* 闩扣下去这一程比 hover 慢一档：它是「我换了一个状态」，不是一次掠过。
+     0.18s 落在例行状态变化（150–300ms）的下沿，仍然干脆；缓动沿用这台仪器
+     唯一的那条曲线。这里补上 background/border-color/box-shadow 三条 ——
+     原本只有 background、color 在过渡，闩要动的正是前两条。
+     刻意不写 transform：那 1px 是 :active 的瞬时按压，别的按钮都是瞬时的，
+     这一颗不该例外，否则它会永远比并排的「编辑供应商」低一格。 */
+  transition:
+    background 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn.halt:hover:not(:disabled) {
+  background: #241512;
+}
+/* 两段式删除的第一段：键已经扣下去了，但还没通电。
+   「高亮」在这个世界里只有两种写法 —— 凹槽加深，或刻线提亮 —— 所以这里两者一起：
+   键座沉进 `#241512`（故障橙压到 12%，本来就是「按下去」那一档），`inset` 加深成
+   真凹槽，那 1px 边从 `#5a2f22` 提亮到 `#8a4630`。
+   不发光、不铺面积、不加光晕 —— The Light-Only-From-Lamps Rule 对故障橙同样成立：
+   它是字和刻线的颜色，不是灯。
+   这一条与 `.sw` / `.detents` / `.slot` 的选中态是同一句话：**凹进去，不放大、不加粗**，
+   读起来像一个真的被按进去的挡位，而不是一个被高亮了的按钮。 */
+.btn.halt.armed,
+.btn.halt.armed:hover:not(:disabled) {
+  background: #241512;
+  border-color: #8a4630;
+  color: var(--fault);
+  box-shadow:
+    inset 0 3px 7px rgba(0, 0, 0, 0.92),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+}
+/* 扣闩那一下的动作：刻字先沉，凹槽后跟上。
+   改前这一下读起来只是一次 hover 加一次换字 —— 一次状态「出现」了，
+   而不是一个时刻「发生」了。两段式删除的全部意义就在那一下上，所以它
+   值得一个有先后的动作，而不是一次瞬时换色。
+
+   两层，两个速度：**快的那层 0.18s（`.halt-face` 自己的），慢的那层 0.42s**
+   （0.42s 是这台仪器最长的一档编排时长，与 `lamp-strike` 同一个数；写在
+   `.armed` 上，管的是底、边、字、凹槽这四样）。先感到字动了，才感到整块
+   凹下去，读起来像闩扣压着键面往下走，而不是整块底同时淡进来。
+   两条都用这台仪器唯一的那条曲线。
+   **退出走的是另一条路**：`.armed` 一撤，时长就回到 `.btn.halt:not(:disabled)`
+   的 0.18s —— 退出比进入快，这是 DESIGN.md 的 Motion 一节定下的规矩。
+
+   `transform` 只加在这个内层 span 上，**绝不加在键本身**：`.btn:active`
+   的 `translateY(1px)` 是瞬时按压，别的按钮都是瞬时的，这一颗不该例外
+   —— 加在键上它会永远比并排的「编辑供应商」低一格。沉下去的是键面上的
+   刻字，键框不动。
+
+   两个数都是量出来的：translateY 2px 是 33px 高的键上刚能分辨的行程，
+   再多就读成键在跳；凹槽从 `.quiet` 的 `none` 直接落到 `inset 0 3px 7px`
+   （比原来那条 `0 2px 4px` 再深一档），是「更深」在 1px 刻线尺度下的极限，
+   再深就糊成一块黑。 */
+.btn.halt .halt-face {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn.halt.armed .halt-face {
+  transform: translateY(2px);
+}
+.btn.halt.armed {
+  transition-duration: 0.42s;
+}
+.btn.xl {
+  font-size: var(--t-body);
+  padding: 12px 14px;
+  letter-spacing: var(--track-head);
+}
+/* 通电格里的紧凑按钮：那一格已经被画面和流式输出占满，按钮得让位。
+   原来这两颗按钮是组件里的两个行内 fontSize（10.5 和 10），
+   同一个角色两套尺寸——收到这里，成为一档有名有姓的尺寸。 */
+.btn.dense {
+  font-size: var(--t-micro);
+  padding: 3px 8px;
+  gap: 5px;
+}
+.btn.icon {
+  padding: 6px 8px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 9px;
+  min-width: 0;
+}
+.field > label,
+.field-head > label {
+  font-family: var(--font-silk);
+  font-variation-settings: 'wdth' 74;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--track-label);
+  font-size: var(--t-label);
+  color: var(--silk-mute);
+}
+/* 字段名这一行有时要在右端挂一盏小铭牌（目前只有「要测哪个模型」用它显示门禁原因）。
+   挂在本来就存在的标签行里，是为了让它常驻也不改变高度 —— 若改成在下方多印一行，
+   门禁一开一合就会把「开始生成」再推 21px，等于把刚修掉的跳动换个地方长出来。 */
+.field-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+/* 字段名和门禁那句话同处一行。两者原来都收不了：标签默认 min-width:auto，
+   `.mp-status` 是 flex:none —— 谁长谁就把这一行撑出容器，而它自己那条
+   text-overflow:ellipsis 永远等不到可以裁的场合。让两者都能收，
+   那条省略号才真的会生效（英文下 `MODEL UNDER TEST` + 那句话最接近这个边界）。 */
+.field-head > label {
+  min-width: 0;
+}
+.mp-status {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-silk);
+  font-variation-settings: 'wdth' 82;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--track-label);
+  font-size: var(--t-label);
+  color: var(--warn);
+}
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--t-body);
+  line-height: 1.45;
+  color: var(--silk-dim);
+  padding: 5px 0;
+  cursor: pointer;
+  user-select: none;
+}
+.check input {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  flex: none;
+  background: var(--well);
+  border: 1px solid var(--engrave-hi);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.check input:checked {
+  background: var(--well);
+  border-color: var(--lamp);
+}
+.check input:checked::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--lamp);
+  box-shadow: 0 0 4px rgba(240, 160, 32, 0.7);
+}
+
+/* 盘上路径：这是一条机读事实，等宽是对的 */
+.pathline {
+  font-family: var(--font-read);
+  font-size: var(--t-label);
+  color: var(--silk-mute);
+  line-height: 1.7;
+  word-break: break-all;
+  margin-top: 10px;
+}
+
+/* 说给人听的短句（「还没有供应商」「只影响这一次运行」「原始响应没有留存」）。
+   原来是借 .pathline 渲染的——于是五句中文散文全部显示成了等宽字，
+   只因为「路径也用这个类」。等宽在这里不是风格，是把一句话伪装成一段数据。
+   这是正文角色：Archivo，能折行，行宽有上限。 */
+.note {
+  font-size: var(--t-body);
+  line-height: 1.5;
+  color: var(--silk-mute);
+  max-width: 46ch;
+  text-wrap: pretty;
+  margin-top: 10px;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 模型候选清单：全局设置里那张「要测哪个模型」便签的编辑面                     */
+/* -------------------------------------------------------------------------- */
+
+/* 标题行与那颗「恢复出厂清单」同占一行。按钮走 .btn.quiet.dense ——
+   它是这块面板上的次级动作，不该长成「开始生成」那样。 */
+.preset-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 14px;
+  margin-bottom: 6px;
+}
+/* 一张单列的凹槽表，与「要测哪个模型」那张候选表是同一套词汇：
+   --well 底、1px --engrave 刻线、inset 投影。它是这块面板上唯一一处
+   「可以自己往里添行」的表，所以它得看起来像一张表，不像一串输入框。 */
+.preset-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  background: var(--well);
+  border: 1px solid var(--engrave);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+/* 名字与叉共用一条 1px 刻缝：缝是这一行的 --engrave 底色透出来的。
+   与 .mp-row 逐字同一套写法。 */
+.preset-row {
+  display: flex;
+  align-items: stretch;
+  gap: 1px;
+  background: var(--engrave);
+}
+/* 行与行之间的 1px 刻缝用 inset 阴影，不用 gap：理由与
+   `.mp-cell + .mp-cell` 同一条 —— gap 要靠容器底色透出来，
+   而这张表是定宽不定高的，用 gap 就得连四周一起算。 */
+.preset-row + .preset-row {
+  box-shadow: inset 0 1px 0 var(--engrave);
+}
+/* 模型名是机读事实，不是散文：等宽，与候选项本身同字号同字体
+   （`.mp-cell` 是 var(--font-read) / var(--t-sub) / line-height 18px）。
+   外框由 .preset-list 那一圈负责，所以这里边框归零、投影归零 ——
+   表里面再套一圈内框就成了「表里有一堆输入框」，不是一张表。
+   选择器必须写成 `.preset-list .preset-name`（0,2,0）：
+   上面那条 `input[type='text']` 是 (0,1,1)，单写 `.preset-name` 会输给它 ——
+   实测字体被改回 Archivo 14px、`border: 0` 也输掉，每一行自己长出一圈内框，
+   正是「一堆输入框」那个样子。 */
+.preset-list .preset-name {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  border-radius: 0;
+  background: var(--well);
+  box-shadow: none;
+  font-family: var(--font-read);
+  font-size: var(--t-sub);
+  line-height: 18px;
+  padding: 5px 8px;
+}
+/* 环必须内缩：外扩的 2px 环会压过 .preset-list 的边框，看着像这一行漏出去了。
+   站内正统写法在 `.mp-clear` / `.mp-cell[data-active]` 那两处。 */
+.preset-list .preset-name:focus-visible {
+  outline: 1px solid var(--lamp);
+  outline-offset: -1px;
+  /* 全局那条 `input:focus-visible` 还会给一圈 0 0 0 1px 的琥珀外描边和
+     inset 投影 —— 在这一格上它们会把表里那一圈内框又请回来。 */
+  box-shadow: none;
+}
+/* 叉那一格。宽度与 `.mp-clear` 同为 29px —— 这个站里「一格动作」只有这一个尺寸。
+   表尾那个空槽用的是同一个类名的空 span：它占着这块地方让竖缝对齐，
+   但它不是按钮，没有 hover、也没有落点。 */
+.preset-drop {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 29px;
+  padding: 0;
+  border: 0;
+  background: var(--well);
+  color: var(--silk-dim);
+}
+button.preset-drop {
+  cursor: pointer;
+}
+button.preset-drop:hover {
+  background: var(--panel);
+  color: var(--silk);
+}
+button.preset-drop:focus-visible {
+  outline: 1px solid var(--lamp);
+  outline-offset: -1px;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 标本页：一个巨型样本 + 边缘极小的等宽事实                                    */
+/* -------------------------------------------------------------------------- */
+
+.sheet-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 59;
+  /* 遮罩只是一层颜色，不接指针：外面那一圈留白由 .sheet-plate 负责，
+     点它才算「点到了面板外面」。 */
+  pointer-events: none;
+  background: rgba(6, 6, 6, 0.62);
+  animation: scrim-in 0.2s ease-out both;
+}
+.sheet-scrim.leaving {
+  animation: scrim-out 0.15s ease-in both;
+}
+@keyframes scrim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes scrim-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* 面板落位的容器：只负责居中、留白和点外关闭。铺满视口。
+   这一圈留白也是「世界还在」的证据——机架暗在底下，没有消失。 */
+.sheet-plate {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  /* 轨道给满，面板的 `height: min(820px, 100%)` 才有确定的百分比可算。
+     只写 place-items 的话轨道是 max-content，100% 会解析不出来。 */
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  place-items: center;
+  padding: clamp(12px, 3vh, 44px) clamp(12px, 3vw, 56px);
+}
+.sheet-plate.leaving {
+  pointer-events: none;
+}
+
+/* 标本页：一块摆到台面上的样本板。
+   这个系统原本声明「没有浮起来的东西」，弹窗是唯一的例外——所以它按
+   现有的影子词汇落地：**有偏移、有柔化、不带任何颜色**，和 `.toast`
+   同一套。不是光晕，是一块板压下去的重量。 */
+.sheet {
+  position: relative;
+  width: min(1240px, 100%);
+  height: min(820px, 100%);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--room);
+  border: 1px solid var(--engrave-hi);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.66);
+  animation: sheet-seat 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+/* 退场比进场快：关门不该让人等。 */
+.sheet-plate.leaving .sheet {
+  animation: sheet-lift 0.18s cubic-bezier(0.4, 0, 1, 1) both;
+}
+/* 「摆上去」，不是「飞进来」：一段极短的垂直落位加上透明度。
+   只有 transform 与 opacity，不碰布局属性，也不用模糊。
+   注意：这条曲线与 .fold 的开合共用同一支自然减速，全工具的动效
+   词汇因此只有两种速度。 */
+@keyframes sheet-seat {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes sheet-lift {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+.sheet-head {
+  flex: none;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 14px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--engrave);
+  min-width: 0;
+}
+.sheet-head .spacer {
+  flex: 1;
+  min-width: 6px;
+}
+/* 标本自己的名字，是这一行里最亮的一档丝印。
+   原来它靠组件里一句 inline `color: var(--silk)` 撑着——一句内联样式在替
+   CSS 补一个缺失的角色。角色回到这里。 */
+.sheet-head .silk {
+  font-size: var(--t-body);
+  letter-spacing: var(--track-head);
+  color: var(--silk);
+}
+.sheet-addr {
+  font-family: var(--font-read);
+  font-size: var(--t-body);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--lamp);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.sheet-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 306px;
+}
+.sheet-main {
+  overflow: auto;
+  padding: 18px;
+  min-width: 0;
+}
+.sheet-facts {
+  overflow: auto;
+  padding: 16px;
+  border-left: 1px solid var(--engrave);
+  background: var(--panel);
+}
+
+/* 巨型样本：不加底色、不裁切 */
+.plate {
+  border: 1px solid var(--engrave);
+  background: transparent;
+  display: grid;
+  place-items: center;
+  min-height: 320px;
+}
+.plate iframe {
+  width: 100%;
+  height: min(64vh, 660px);
+  border: 0;
+  display: block;
+  background: transparent;
+}
+
+/* 量化事实：标签在左，读数右对齐成一条数字边 */
+.facts {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0;
+  margin: 0;
+}
+.facts dt {
+  font-family: var(--font-silk);
+  font-variation-settings: 'wdth' 76;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--track-label);
+  font-size: var(--t-label);
+  color: var(--silk-mute);
+  padding: 6px 10px 6px 0;
+  border-bottom: 1px solid rgba(45, 44, 40, 0.7);
+  white-space: nowrap;
+  align-self: center;
+}
+.facts dd {
+  font-family: var(--font-read);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-sub);
+  color: var(--silk);
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(45, 44, 40, 0.7);
+  text-align: right;
+  word-break: break-all;
+  margin: 0;
+}
+.facts dd.hot {
+  color: var(--fault);
+}
+.facts dd.dim {
+  color: var(--silk-mute);
+}
+
+/* 标本页读数栏：行线由单元格自身画满，标签与读数同高 */
+.sheet-facts .facts {
+  align-items: stretch;
+}
+.sheet-facts .facts dt {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  padding: 8px 10px 8px 0;
+  font-size: var(--t-label);
+  line-height: 1.2;
+  border-bottom: 1px solid var(--engrave);
+}
+.sheet-facts .facts dd {
+  padding: 8px 0;
+  font-size: var(--t-sub);
+  line-height: 1.5;
+  border-bottom: 1px solid var(--engrave);
+}
+
+/* 本次运行读数：竖线由标签画，行线交给右栏，读数与标签同高 */
+.run-facts {
+  margin-bottom: 12px;
+}
+.run-facts dt {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  padding: 8px 10px 8px 0;
+  font-size: var(--t-label);
+  line-height: 1.2;
+  border-bottom: 0;
+  border-right: 1px solid var(--engrave);
+}
+.run-facts dd {
+  padding: 8px 0 8px 12px;
+  font-size: var(--t-sub);
+  line-height: 1.5;
+  text-align: left;
+  border-bottom: 0;
+}
+
+/* 刻在面板上的抽屉。
+   开合不是淡入淡出：内容被槽口切着长出来，像抽屉从凹槽里滑出——
+   这台仪器里没有东西「浮起来」，只有东西从井里升起来。 */
+.fold {
+  border: 1px solid var(--engrave);
+  margin-top: 12px;
+  background: var(--panel);
+  /* 抽屉要能从 0 长到内容高度，而 `block-size: auto` 默认不可插值。
+     这是继承属性，声明在抽屉上，`::details-content` 就能拿到——
+     不必为了一个折叠块把整份文档的尺寸插值全打开。 */
+  interpolate-size: allow-keywords;
+}
+/* 关上的瞬间内容必须还留在渲染树里，否则高度已经没了、无从过渡；
+   content-visibility 的 allow-discrete 就是为了把这个拆除动作推迟到过渡结束。
+   关闭比打开快（退出总是比进入快），所以时长写在两个状态上而不是一处。 */
+.fold::details-content {
+  block-size: 0;
+  overflow: clip;
+  opacity: 0;
+  transition:
+    block-size 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    content-visibility 0.18s allow-discrete;
+}
+.fold[open]::details-content {
+  block-size: auto;
+  opacity: 1;
+  transition-duration: 0.26s;
+}
+.fold > summary {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 12px;
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--font-silk);
+  font-variation-settings: 'wdth' 76;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--track-label);
+  font-size: var(--t-label);
+  color: var(--silk-dim);
+}
+.fold > summary::-webkit-details-marker {
+  display: none;
+}
+.fold > summary::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-right: 1px solid var(--silk-mute);
+  border-bottom: 1px solid var(--silk-mute);
+  transform: rotate(-45deg);
+  transition: transform 0.16s ease-out;
+}
+.fold[open] > summary::before {
+  transform: rotate(45deg);
+}
+.fold > summary:hover {
+  color: var(--silk);
+}
+.fold-body {
+  padding: 12px;
+  border-top: 1px solid var(--engrave);
+}
+/* 思考强度那一排是六档，名字就是发到线上的枚举值（minimal…max），一个都不能省、
+   也不能缩写成别的字。六段挤在折叠体这一栏里，共享的 .sw 内边距（左右各 10px）
+   放不下 —— 只在这一处收到 6px，别的拨档开关的手感不动。 */
+.effort-row .sw > button {
+  padding-inline: 6px;
+}
+/* 内容本身再向外让一小步，抽屉才有「滑出」而不是「撑开」的读感。
+   只有位移和透明度，不碰发光、不投影——深度在这个世界里只由凹槽表达。 */
+@keyframes fold-out {
+  from {
+    transform: translateY(-4px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+.fold[open] .fold-body {
+  animation: fold-out 0.26s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+pre.code {
+  margin: 0;
+  font-family: var(--font-read);
+  font-size: var(--t-sub);
+  line-height: 1.65;
+  color: var(--silk-dim);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 420px;
+  overflow: auto;
+  background: var(--well);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+  padding: 10px;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 空态与提示                                                                  */
+/* -------------------------------------------------------------------------- */
+
+.empty {
+  padding: 56px 20px;
+  text-align: center;
+  color: var(--silk-mute);
+  font-size: var(--t-body);
+  line-height: 1.5;
+}
+.empty .silk {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  z-index: 90;
+  background: var(--panel);
+  border: 1px solid var(--engrave-hi);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+  color: var(--silk);
+  font-size: var(--t-body);
+  padding: 9px 15px;
+  max-width: min(70vw, 62ch);
+}
+.toast.error {
+  color: var(--fault);
+  border-color: #5a2f22;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 窄屏：机架塌成一条通道带                                                    */
+/* -------------------------------------------------------------------------- */
+
+@media (max-width: 1040px) {
+  .bench {
+    grid-template-columns: minmax(0, 1fr) 300px;
+  }
+  /* 副行的字号不在这里退档。曾经这里写着 `.slot-sub { font-size: 10.5px }`，
+     因为「退半档」是当时唯一能让参数串塞进 300px 的办法——但那是假的：
+     实测 `claude-sonnet-4-5-20250929 · ANTH · T=1 · MAX=64000` 在 348px 栏里
+     就已经超出 37px，缩到 10.5px 仍超出 20px。字号救不了它，折行才行。
+     副行现在允许折行，于是这一档只是为迁就栏宽而存在的第七个字号，删掉。 */
+}
+
+/* 窄屏 = 单列。这一档断的不是某个设备宽度，是**结构**：宽屏时控制台是右边
+   独立的一列、机架有自己的滚动区，横杆占多高都跟画廊没有关系；到了单列，
+   所有东西排进同一条页面流，横杆的每一 px 都要靠滑动去还。 */
+@media (max-width: 900px) {
+  .bench {
+    grid-template-columns: minmax(0, 1fr);
+    /* 单列时的顺序：总线条 → 控制台 → 机架。控制台必须排在机架**之前** ——
+       一整面机架有四千多像素，把「开始生成」摆在它后面等于要滑五屏才够得着
+       （改之前实测：整页 5614px，那颗键在第 5232px）。代价是首屏先看到控制台
+       再看到画，这是手机上一次明确的选择：先决定打哪一路，再看画。 */
+    grid-template-areas:
+      'bus'
+      'panel'
+      'bay';
+    grid-template-rows: auto auto auto;
+    height: auto;
+    min-height: 100%;
+  }
+  .panel {
+    border-left: 0;
+    border-top: 1px solid var(--engrave);
+  }
+  .bay {
+    min-height: 70vh;
+  }
+
+  /* 单列时这一列没有自己的滚动区，`.rack-scroll` 上那句 `overflow-y: auto`
+     就成了一个「假滚动」：它自己不滚（内容全部展开），却仍然构成一个
+     滚动容器，把里面 `.rack-band` 的 `position: sticky` 关在盒子里 ——
+     表现是日期带滚到横杆底就卡住不动了（实测：横杆钉在 0、带子停在 -809）。
+     整页滚的时候这里就不该有容器。 */
+  .rack-scroll {
+    flex: none;
+    overflow: visible;
+  }
+  /* 右栏同一个毛病：`.panel-scroll` 也是「它自己不滚」。控制台里的标题行
+     现在要粘（见下面 `.prov-head`），被关在盒子里就粘不动。 */
+  .panel-scroll {
+    overflow: visible;
+  }
+
+  /* 横杆收成一行。左边写「现在生效的是哪几个条件」，右边是显示几条和一颗
+     开关键。收起来之后它粘在顶上只吃 45px —— 改之前是 238px 常驻，
+     吃掉 28% 的视口，还把日期带压到身下。 */
+  .rail {
+    /* `block-size: auto` 默认不可插值；这是继承属性，声明在横杆上，
+       `.rail-full` 就拿到了 —— 和 `.fold` / `.prov-slot` 同一套机制。 */
+    interpolate-size: allow-keywords;
+  }
+  .rail-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: var(--rail-line-h);
+    padding: 0 12px;
+  }
+  /* 摘要必须自己说清「现在筛的是什么」。否则每看一眼画廊都要点开确认一次，
+     省下的高度又赔回去了。只列非默认值，一个都没改时就是「全部」。 */
+  .rail-cur {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: var(--font-silk);
+    font-variation-settings: 'wdth' 74;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: var(--track-label);
+    font-size: var(--t-label);
+    color: var(--silk-dim);
+  }
+  .rail-toggle {
+    flex: none;
+    height: var(--switch-h);
+  }
+  .rail-full {
+    block-size: 0;
+    overflow: clip;
+    visibility: hidden;
+    transition:
+      block-size 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+      visibility 0.18s;
+  }
+  .rail.open .rail-full {
+    block-size: auto;
+    visibility: visible;
+    transition-duration: 0.26s;
+  }
+  .rail-groups {
+    padding: 0 12px 10px;
+  }
+  /* 计数在摘要行上已经印了一次，展开的那一片里不必再印第二遍。 */
+  .rail-shown {
+    display: none;
+  }
+  /* 日期带粘在横杆**下面**。两边都写 top:0 的话，横杆会把带子整个压在身下
+     （改之前实测：238px 的横杆把带子压到 y = -574，整条日期读不到）。
+     +1px 是横杆自己那条 border-bottom —— 不带上的话带子会盖掉那条刻线。 */
+  .rack-band {
+    top: calc(var(--rail-line-h) + 1px);
+  }
+
+  .sheet-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sheet-facts {
+    border-left: 0;
+    border-top: 1px solid var(--engrave);
+  }
+  .detents {
+    max-width: 100%;
+  }
+
+  /* 回执就长在标题行里 —— 跟宽屏**同一份样式**（`.prov-receipt` 那几条规则
+     一个字都没动），窄屏不再把它拆成钉在屏幕底部的浮条。
+     但「就地」这件事在单列里多一个前提：宽屏时右栏是自己那一列的滚动区、
+     标题行永远在视野里；单列时所有东西排进同一条页面流，「保存」常常在
+     屏外，标题行会先被滚走 —— 回执留在原地就等于没说（改之前实测：横屏档
+     名册只剩一家时，滚到保存键那一刻标题行也在 -171px）。所以标题行粘住。
+     `top: 0` 而不是跟横杆对齐：横杆在 `.bay` 里，而这一节整块排在 `.bay`
+     之前，两者的粘性区间根本不相交 —— 标题行能粘的时候横杆还没到顶。 */
+  .prov-head {
+    position: sticky;
+    top: 0;
+    z-index: 4;
+    /* 必须是实底：滚过来的名册、表单要挡得住。 */
+    background: var(--panel);
+    /* 钉住的那条边要说得清 —— 内容是**从它下面**滑过去的，没有这条刻线，
+       被切掉一半的按钮读起来像是坏了（`.rail` / `.busbar` 立的都是这条先例）。
+       这条线不随粘住与否出现或消失，所以上下布局不会因此跳 1px。 */
+    border-bottom: 1px solid var(--engrave);
+    /* 粘住之后这一块要盖满整幅宽，否则字会从左右两道缝里穿过去 ——
+       用负外边距吃掉 `.bay-section` 的内边距、再自己补回来（那个值
+       由 `.bay-section` 以 `--section-pad` 给出：窄屏 16px，≤620px 是 12px）。 */
+    margin: 0 calc(-1 * var(--section-pad));
+    padding: 0 var(--section-pad) 10px;
+  }
+  /* 原来标题行自己带 11px 下边距；那 11px 落在粘块的**外边**，会成一条
+     透明的缝。挪进内边距里，缝就归实底管了。 */
+  .prov-head .bay-head {
+    margin-bottom: 0;
+  }
+  .toast {
+    bottom: calc(22px + var(--safe-b));
+  }
+}
+
+/* 手指。按**主指针**是不是粗的来判断，不按屏幕宽度：带触屏的笔记本两个都真，
+   而那里主要用的是鼠标，控件不该为了旁边那块屏长胖 19px。
+   量的是「按下去的那一下够不够得着」，所以只管可点/可输入的东西；
+   通道格那种整块都是落点的不在此列。 */
+@media (pointer: coarse) {
+  /* 开关与挡位：原来 25px / 29px 高，手指按上去经常落到隔壁那一档上。 */
+  .sw > button {
+    min-height: var(--switch-h);
+    padding: 5px 12px;
+  }
+  .detents > button {
+    min-height: var(--switch-h);
+    padding: 5px 12px;
+  }
+  .btn {
+    min-height: var(--switch-h);
+  }
+  select,
+  input[type='text'],
+  input[type='password'],
+  input[type='number'] {
+    min-height: var(--switch-h);
+  }
+  /* 模型候选表：一格一个模型名，是手机上最主要的一串落点。
+     手指档只改两个常数 —— 行高换成 44px 的 `--switch-h`，行数收到三行 ——
+     槽位与表的高度上限都是从这两个数算出来的（见 `.model-pick` 的声明），
+     所以这里不再重复写算式。
+     为什么是三行不是五行：宽屏那 162px 到手机上就是整整四行，会把「开始生成」
+     顶到 878px —— 首屏（844px）正好看不到那颗键。三行时按钮回到 792px。
+     槽高 = 3 × 44 + 20(回执条) + 2(边框) = 154px。 */
+  .model-pick {
+    --mp-row-h: var(--switch-h);
+    --mp-rows: 3;
+  }
+  .model-pick .mp-clear {
+    width: var(--switch-h);
+  }
+  /* 抽屉的标题行也是要按的。 */
+  .fold > summary {
+    min-height: var(--switch-h);
+  }
+  /* 勾选框：14px 的方点在手指底下只比指甲盖大一点。
+     整个 `.check` 行已经是落点，但方点本身也该看得见地大一号。 */
+  .check {
+    min-height: var(--switch-h);
+  }
+  .check input {
+    width: 20px;
+    height: 20px;
+  }
+  .check input:checked::after {
+    width: 8px;
+    height: 8px;
+  }
+  /* 模型候选清单：每一行都是一个落点，手指底下不许比 44px 矮。
+     输入框被 .preset-row 拉满一行，所以抬行高就是抬落点。 */
+  .preset-name {
+    min-height: var(--switch-h);
+    padding: 5px 10px;
+  }
+  /* 叉那一格与名字等高，但宽度也放到 44px —— 29px 的窄条在手指底下
+     正好是「想删第三行、删掉了第四行」的那个尺寸。 */
+  .preset-drop {
+    width: var(--switch-h);
+  }
+  /* 手机上 hover 是个谎言：手指划过去不会悬停，只会先触发一次 hover。
+     底色变化留着（`:active` 那一下是真的），但不再假装有悬停态。 */
+  .ch:hover .ch-plate {
+    filter: none;
+  }
+}
+
+/* 手机横屏：屏变成一块短板，一列排下去「控制台 + 机架」要滑好几屏。
+   横过来的宽度已经够放两列，那就按宽屏那套摆回左右 —— 机架有自己的滚动区，
+   横杆收成的那一行还照旧（收不收由宽度决定，跟这条无关）。 */
+@media (max-width: 900px) and (min-width: 560px) and (max-height: 520px) {
+  .bench {
+    grid-template-columns: minmax(0, 1fr) 300px;
+    grid-template-areas:
+      'bus bus'
+      'bay panel';
+    grid-template-rows: auto minmax(0, 1fr);
+    height: 100%;
+    min-height: 0;
+  }
+  .panel {
+    border-top: 0;
+    border-left: 1px solid var(--engrave);
+  }
+  .bay {
+    border-top: 0;
+    min-height: 0;
+  }
+  /* 单列那一档把 `.rack-scroll` 的滚动区拆了（整页滚时它是个假容器），
+     但这一档是两列：机架必须自己滚。少了这三行，机架会撑到 4926px
+     从 `.bay` 里溢出去，整页变成一条 5025px 的长条 —— 390px 高的窗口里
+     一往下滚，右边的控制台就跟着滚走了。 */
+  .rack-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+  }
+  /* 右边同理：单列那一档把 `.panel-scroll` 也拆成了假容器（好让标题行粘在
+     整页上），两列时控制台有自己的滚动区，它必须滚回来。 */
+  .panel-scroll {
+    overflow-y: auto;
+  }
+  /* 横屏时横杆在 `.rack-scroll` 外面、不再粘在页面上，所以日期带自己粘回 0 ——
+     不然它会在滚动区顶端留一条 44px 的空缝。标题行同理：这一档它上面没有
+     横杆了，两列各滚各的，它粘自己那一列的顶。 */
+  .rack-band,
+  .prov-head {
+    top: 0;
+  }
+}
+
+@media (max-width: 620px) {
+  /* 手机上机架格缩到 10px 边距（下面那条），控制台还留着桌面的 16px 就显得
+     两边不齐；一并收到 12px，同时把纵向的内边距也压掉一点 —— 控制台现在是
+     首屏，它每一 px 都是从「够不够得着开始生成」里省出来的。 */
+  .bay-section {
+    padding: 12px 12px 14px;
+    /* 粘住的标题行用负外边距吃掉父级的左右内边距（见 `.prov-head`），
+       所以它必须知道那个数 —— 这一档父级从 16px 收到了 12px。 */
+    --section-pad: 12px;
+  }
+  /* 运行读数三行，桌面上每行 34px；手机上收到 28px。 */
+  .panel .run-facts dt,
+  .panel .run-facts dd {
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+  .rack-grid {
+    margin: 0 10px;
+  }
+  /* 密度档位是按桌面列宽定的；到手机上要重新给，否则 'm' 档的 220px
+     在 390px 屏上只剩一列——属性选择器的权重比这里的选择器高，光改
+     .rack 的默认值是改不动的。 */
+  .rack,
+  .rack[data-size='s'] {
+    --ch-min: 132px;
+  }
+  .rack[data-size='m'] {
+    --ch-min: 168px;
+  }
+  .rack[data-size='l'] {
+    --ch-min: 210px;
+  }
+  /* 总线条放不下就折行，不许把读数截断——「通道 2」这种残句比没有更糟。
+     折行后各项仍在同一条基线上，读数窗之间的间隔靠 gap 保持。 */
+  .busbar {
+    height: auto;
+    min-height: var(--rail-h);
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 8px 12px;
+  }
+  .busbar .spacer {
+    display: none;
+  }
+  /* 折行之后铭牌不再需要靠右外边距和下一项拉开——那是 flex 的 gap 的活。
+     它的凹槽底与刻线保留：牌子还是那块牌子，只是窄了。 */
+  .nameplate {
+    margin-right: 0;
+  }
+  .nameplate b {
+    font-size: var(--t-body);
+    letter-spacing: var(--track-mark);
+  }
+  .nameplate span {
+    display: none;
+  }
+  /* 右侧的跟踪读数在窄屏只留「是哪一路」——动物和供应商那两段让位，
+     地址不许截断（它是这一格的身份）。 */
+  .bus-track {
+    order: 9;
+    width: 100%;
+  }
+  .bus-track .who.dim {
+    display: none;
+  }
+  /* 弹窗头部在手机上放不下一整行：地址、动物名、供应商名三段都是
+     `nowrap`，加起来 440px 塞进 366px 的面板里，会把整块面板撑宽
+     70px（`overflow: hidden` 挡住看不见，但滚动位置会被焦点带偏）。
+     这里让它折行，并让位给下面那半行已经在读数里写着的供应商名。 */
+  .sheet-head {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 48px;
+    padding: 7px 12px;
+    column-gap: 10px;
+    row-gap: 3px;
+  }
+  .sheet-head .silk-plain {
+    display: none;
+  }
+  .sheet-addr {
+    min-width: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after,
+  /* 抽屉的内容是一个伪元素，`*::before / ::after` 都盖不到它。
+     少了这一条，全世界的动画都停了，只有抽屉还在慢慢长高。 */
+  .fold::details-content {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  /* 「有意替代」：抹掉位移，留住淡入淡出。
+     弹窗靠的不是那 10px 的落位，是「房间暗下去、面板亮起来」这个
+     状态变化本身——那部分必须留下，否则关掉动效就等于关掉了反馈。
+     上面那条 `*` 把时长压到 0.001ms，所以这里必须显式把时长写回来；
+     `.sheet` 比 `*` 更具体，两个都带 !important 时它赢。 */
+  .sheet {
+    animation-name: sheet-seat-calm;
+    animation-duration: 0.14s !important;
+  }
+  .sheet-plate.leaving .sheet {
+    animation-name: sheet-lift-calm;
+    animation-duration: 0.1s !important;
+  }
+  .sheet-scrim {
+    animation-name: scrim-in;
+    animation-duration: 0.14s !important;
+  }
+  .sheet-scrim.leaving {
+    animation-name: scrim-out;
+    animation-duration: 0.1s !important;
+  }
+  /* 同一条「有意替代」用在供应商表单上：抹掉位移和升降，留住淡入淡出
+     和「谁在台面上」这件事本身——关掉动效不该等于关掉反馈。
+     高度不再插值，所以这里直接把它切成两态（瞬间换高），
+     两块交接只用一次淡入来表达（见下面）。
+     不能用简写里逐项加 !important（那是非法语法，整条声明会被丢掉）。 */
+  .prov-slot-out,
+  .prov-slot-in {
+    transition: none !important;
+  }
+  /* 横杆的开合同样抹掉高度、留住可见性 —— 与抽屉、供应商槽同一套替代。 */
+  .rail-full {
+    transition: none !important;
+  }
+  .prov-form,
+  .prov-slot-out > .row {
+    transform: none !important;
+    transition-property: opacity !important;
+  }
+  /* 闩扣那 2px 的落座也抹掉：位移是关掉动效时唯一该消失的东西。
+     刻字仍然换、凹槽仍然深、刻线仍然亮 —— 扣闩这件事本身照旧看得见，
+     只是不再「走」下去。与上面 `.prov-form` 用的是同一条替代。 */
+  .btn.halt .halt-face {
+    transform: none !important;
+  }
+  /* 重叠不依赖位移：两块同格，一起淡就会在半途互相穿透。所以这里不交叉淡化，
+     改成「让位的那块直接消失、接上的那块淡入」——任何一帧都只有一块是可见的。
+     哪块在让位取决于方向，而过渡取的是**终态**那条规则里的时长，故两条路各写各的：
+       常态：按钮在台面上、表单不在 → 表单让位（0s）、按钮接上（0.14s）
+       .open：反过来。
+     整段就一次 0.14s 的淡入，比正常路径快，反馈仍在。 */
+  .prov-form {
+    transition-duration: 0s !important;
+  }
+  .prov-slot-out > .row {
+    transition-duration: 0.14s !important;
+  }
+  .prov-slot.open .prov-form {
+    transition-duration: 0.14s !important;
+  }
+  .prov-slot.open .prov-slot-out > .row {
+    transition-duration: 0s !important;
+  }
+}
+@keyframes sheet-seat-calm {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes sheet-lift-calm {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}

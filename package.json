@@ -1,0 +1,37 @@
+{
+  "name": "animal-bike-test",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "跨供应商同名模型横向对比工具：随机抽一道「动物骑单车」题，看图判断哪家降智。",
+  "scripts": {
+    "dev": "concurrently -n server,web -c cyan,magenta \"npm:dev:server\" \"npm:dev:web\"",
+    "dev:server": "tsx watch server/index.ts",
+    "dev:web": "vite --config web/vite.config.ts",
+    "build": "vite build --config web/vite.config.ts",
+    "start": "tsx server/index.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "mock": "node tools/mock-provider.mjs",
+    "seed": "node tools/seed-demo.mjs",
+    "shot": "node tools/edge-cdp.mjs shot http://127.0.0.1:5174/ .impeccable/review/desktop.png --width=1440 --height=1800",
+    "check:svg": "tsx tools/check-square.mts",
+    "check:served": "node tools/check-served.mjs",
+    "smoke": "npm run check:svg && node tools/smoke.mjs && node tools/smoke2.mjs && node tools/smoke-abort.mjs && node tools/smoke-sanitize.mjs"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.10.5",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.7"
+  }
+}

@@ -1,0 +1,413 @@
+
+=== 844x390 ===
+--do ¡ú {"vw":844,"vh":390,"areas":"\"bus bus\" \"bay panel\"","cols":"544px 300px","matchesLandscapeQuery":true,"matchesCoarse":true,"panelW":300,"panelBorderLeft":"1px","panelBorderTop":"0px","rackBandTop":"0px","railLineDisplay":"flex","docOverflowX":0,"scrollsPage":true}
+{
+  "viewport": {
+    "w": 844,
+    "h": 390,
+    "dpr": 1
+  },
+  "counts": {
+    "cells": 28,
+    "plates": 28
+  },
+  "rowCount": 14,
+  "cellHeights": [
+    342.9,
+    342.9,
+    342.9,
+    342.9,
+    342.9,
+    342.9,
+    342.9,
+    342.9,
+    342.9,
+    342.9,
+    342.9,
+    342.9,
+    342.9,
+    342.9
+  ],
+  "plateRatios": [
+    1.3
+  ],
+  "silkHeights": [
+    121
+  ],
+  "overflowX": 0,
+  "contrastOffenders": [],
+  "clipped": [],
+  "smallTargets": [
+    {
+      "tag": "input",
+      "cls": "",
+      "label": "",
+      "w": 20,
+      "h": 20
+    },
+    {
+      "tag": "input",
+      "cls": "",
+      "label": "",
+      "w": 20,
+      "h": 20
+    }
+  ]
+}
+
+=== 740x420 ===
+--do ¡ú {"vw":740,"vh":420,"areas":"\"bus bus\" \"bay panel\"","cols":"440px 300px","matchesLandscapeQuery":true,"matchesCoarse":true,"panelW":300,"panelBorderLeft":"1px","panelBorderTop":"0px","rackBandTop":"0px","railLineDisplay":"flex","docOverflowX":0,"scrollsPage":true}
+{
+  "viewport": {
+    "w": 740,
+    "h": 420,
+    "dpr": 1
+  },
+  "counts": {
+    "cells": 28,
+    "plates": 28
+  },
+  "rowCount": 28,
+  "cellHeights": [
+    456.5,
+    456.5,
+    456.5,
+    456.5,
+    456.5,
+    456.5,
+    456.5,
+    456.5,
+    456.5,
+    456.5,
+    456.5,
+    456.5,
+    456.5,
+    456.5,
+    456.5,
+    456.5,
+    456.5,
+    456.5,
+    456.5,
+    456.5,
+    456.5,
+    456.5,
+    456.5,
+    456.5,
+    456.5,
+    456.5,
+    456.5,
+    456.5
+  ],
+  "plateRatios": [
+    1.3
+  ],
+  "silkHeights": [
+    121
+  ],
+  "overflowX": 0,
+  "contrastOffenders": [],
+  "clipped": [],
+  "smallTargets": [
+    {
+      "tag": "input",
+      "cls": "",
+      "label": "",
+      "w": 20,
+      "h": 20
+    },
+    {
+      "tag": "input",
+      "cls": "",
+      "label": "",
+      "w": 20,
+      "h": 20
+    }
+  ]
+}
+
+=== 560x520 ===
+--do ¡ú {"vw":560,"vh":520,"areas":"\"bus bus\" \"bay panel\"","cols":"260px 300px","matchesLandscapeQuery":true,"matchesCoarse":true,"panelW":300,"panelBorderLeft":"1px","panelBorderTop":"0px","rackBandTop":"0px","railLineDisplay":"flex","docOverflowX":0,"scrollsPage":true}
+{
+  "viewport": {
+    "w": 560,
+    "h": 520,
+    "dpr": 1
+  },
+  "counts": {
+    "cells": 28,
+    "plates": 28
+  },
+  "rowCount": 28,
+  "cellHeights": [
+    330.5,
+    330.5,
+    330.5,
+    330.5,
+    330.5,
+    330.5,
+    330.5,
+    330.5,
+    330.5,
+    330.5,
+    330.5,
+    330.5,
+    330.5,
+    330.5,
+    330.5,
+    330.5,
+    330.5,
+    330.5,
+    330.5,
+    330.5,
+    330.5,
+    330.5,
+    330.5,
+    330.5,
+    330.5,
+    330.5,
+    330.5,
+    330.5
+  ],
+  "plateRatios": [
+    1.3
+  ],
+  "silkHeights": [
+    121
+  ],
+  "overflowX": 0,
+  "contrastOffenders": [],
+  "clipped": [],
+  "smallTargets": [
+    {
+      "tag": "input",
+      "cls": "",
+      "label": "",
+      "w": 20,
+      "h": 20
+    },
+    {
+      "tag": "input",
+      "cls": "",
+      "label": "",
+      "w": 20,
+      "h": 20
+    }
+  ]
+}
+
+=== 559x520 ===
+--do ¡ú {"vw":559,"vh":520,"areas":"\"bus\" \"panel\" \"bay\"","cols":"559px","matchesLandscapeQuery":false,"matchesCoarse":true,"panelW":559,"panelBorderLeft":"0px","panelBorderTop":"1px","rackBandTop":"45px","railLineDisplay":"flex","docOverflowX":0,"scrollsPage":true}
+{
+  "viewport": {
+    "w": 559,
+    "h": 520,
+    "dpr": 1
+  },
+  "counts": {
+    "cells": 28,
+    "plates": 28
+  },
+  "rowCount": 10,
+  "cellHeights": [
+    285.7,
+    285.7,
+    285.7,
+    285.7,
+    285.7,
+    285.7,
+    285.7,
+    285.7,
+    285.7,
+    285.7
+  ],
+  "plateRatios": [
+    1.3
+  ],
+  "silkHeights": [
+    121
+  ],
+  "overflowX": 0,
+  "contrastOffenders": [],
+  "clipped": [],
+  "smallTargets": [
+    {
+      "tag": "input",
+      "cls": "",
+      "label": "",
+      "w": 20,
+      "h": 20
+    },
+    {
+      "tag": "input",
+      "cls": "",
+      "label": "",
+      "w": 20,
+      "h": 20
+    }
+  ]
+}
+
+=== 560x521 ===
+--do ¡ú {"vw":560,"vh":521,"areas":"\"bus\" \"panel\" \"bay\"","cols":"560px","matchesLandscapeQuery":false,"matchesCoarse":true,"panelW":560,"panelBorderLeft":"0px","panelBorderTop":"1px","rackBandTop":"45px","railLineDisplay":"flex","docOverflowX":0,"scrollsPage":true}
+{
+  "viewport": {
+    "w": 560,
+    "h": 521,
+    "dpr": 1
+  },
+  "counts": {
+    "cells": 28,
+    "plates": 28
+  },
+  "rowCount": 10,
+  "cellHeights": [
+    286,
+    286,
+    286,
+    286,
+    286,
+    286,
+    286,
+    286,
+    286,
+    286
+  ],
+  "plateRatios": [
+    1.3
+  ],
+  "silkHeights": [
+    121
+  ],
+  "overflowX": 0,
+  "contrastOffenders": [],
+  "clipped": [],
+  "smallTargets": [
+    {
+      "tag": "input",
+      "cls": "",
+      "label": "",
+      "w": 20,
+      "h": 20
+    },
+    {
+      "tag": "input",
+      "cls": "",
+      "label": "",
+      "w": 20,
+      "h": 20
+    }
+  ]
+}
+
+=== 900x520 ===
+--do ¡ú {"vw":900,"vh":520,"areas":"\"bus bus\" \"bay panel\"","cols":"600px 300px","matchesLandscapeQuery":true,"matchesCoarse":true,"panelW":300,"panelBorderLeft":"1px","panelBorderTop":"0px","rackBandTop":"0px","railLineDisplay":"flex","docOverflowX":0,"scrollsPage":true}
+{
+  "viewport": {
+    "w": 900,
+    "h": 520,
+    "dpr": 1
+  },
+  "counts": {
+    "cells": 28,
+    "plates": 28
+  },
+  "rowCount": 14,
+  "cellHeights": [
+    363.9,
+    363.9,
+    363.9,
+    363.9,
+    363.9,
+    363.9,
+    363.9,
+    363.9,
+    363.9,
+    363.9,
+    363.9,
+    363.9,
+    363.9,
+    363.9
+  ],
+  "plateRatios": [
+    1.3
+  ],
+  "silkHeights": [
+    121
+  ],
+  "overflowX": 0,
+  "contrastOffenders": [],
+  "clipped": [],
+  "smallTargets": [
+    {
+      "tag": "input",
+      "cls": "",
+      "label": "",
+      "w": 20,
+      "h": 20
+    },
+    {
+      "tag": "input",
+      "cls": "",
+      "label": "",
+      "w": 20,
+      "h": 20
+    }
+  ]
+}
+
+=== 901x520 ===
+--do ¡ú {"vw":901,"vh":520,"areas":"\"bus bus\" \"bay panel\"","cols":"601px 300px","matchesLandscapeQuery":false,"matchesCoarse":true,"panelW":300,"panelBorderLeft":"1px","panelBorderTop":"0px","rackBandTop":"0px","railLineDisplay":"none","docOverflowX":0,"scrollsPage":false}
+{
+  "viewport": {
+    "w": 901,
+    "h": 520,
+    "dpr": 1
+  },
+  "counts": {
+    "cells": 28,
+    "plates": 28
+  },
+  "rowCount": 14,
+  "cellHeights": [
+    364.3,
+    364.3,
+    364.3,
+    364.3,
+    364.3,
+    364.3,
+    364.3,
+    364.3,
+    364.3,
+    364.3,
+    364.3,
+    364.3,
+    364.3,
+    364.3
+  ],
+  "plateRatios": [
+    1.3
+  ],
+  "silkHeights": [
+    121
+  ],
+  "overflowX": 0,
+  "contrastOffenders": [],
+  "clipped": [],
+  "smallTargets": [
+    {
+      "tag": "input",
+      "cls": "",
+      "label": "",
+      "w": 20,
+      "h": 20
+    },
+    {
+      "tag": "input",
+      "cls": "",
+      "label": "",
+      "w": 20,
+      "h": 20
+    }
+  ]
+}
+

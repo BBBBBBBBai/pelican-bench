@@ -1,0 +1,1840 @@
+/* ==========================================================================
+   动物骑单车测试台 — 仪器机架
+   视觉世界：哑光阳极氧化面板 + 工业丝印 + 琥珀指示灯
+   光只从灯里出来，不从边上漏。没有任何装饰性的边框、浮雕或投影。
+   ========================================================================== */
+
+/* -------------------------------------------------------------------------- */
+/* 字体：自托管，不依赖 CDN（这条链路要能打包成 exe 离线跑）                     */
+/* -------------------------------------------------------------------------- */
+
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+  src: url('/src/fonts/archivo-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+  src: url('/src/fonts/archivo-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Azeret Mono';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/src/fonts/azeret-mono-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Azeret Mono';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/src/fonts/azeret-mono-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 面板值                                                                      */
+/* -------------------------------------------------------------------------- */
+
+:root {
+  --room: #0c0c0b; /* 机架背后的房间 */
+  --panel: #191917; /* 哑光阳极氧化面板 */
+  --panel-hi: #21201d; /* 被手摸过、有点反光的面板 */
+  --well: #101010; /* 凹槽：读数窗、输入槽、开关底座 */
+  --engrave: #2d2c28; /* 刻线 */
+  --engrave-hi: #3d3a34; /* 刻线（提起时） */
+
+  /* 丝印三级。三级都必须过 4.5:1——这些字最小只有 9.5px，而它们印的
+     是「哪一次运行、哪一家、什么参数」，正是这个工具的全部结论。 */
+  --silk: #e6e3da; /* 主色 —— 对面板 12.6:1 */
+  --silk-dim: #a8a49a; /* 次级 —— 对面板 7.0:1 */
+  --silk-mute: #8f8c82; /* 刻线 —— 对面板 5.2:1 */
+
+  --lamp: #f0a020; /* 琥珀指示灯：默认世界里唯一饱和的颜色 */
+  --lamp-veil: rgba(240, 160, 32, 0.14);
+  --ok: #8faa62; /* 一路走完、没挂标签 */
+  --warn: #c8862f; /* 截断 / 非 SVG / 模型名不符 */
+  --fault: #e4643f; /* 请求失败 / 超时 / 渲染失败 */
+
+  --font-silk: 'Archivo', 'PingFang SC', 'Microsoft YaHei', 'Source Han Sans SC', 'Noto Sans SC', sans-serif;
+  /* 等宽栈里也要有汉字。原来这里没有，`第 26 条` 会掉到一个宽 14% 的系统字体上，
+     跟旁边丝印里的汉字长得不是一家人。 */
+  --font-read: 'Azeret Mono', ui-monospace, 'Cascadia Mono', Consolas, 'Microsoft YaHei', 'PingFang SC',
+    monospace;
+
+  /* 字级：六档，级差 ≥1px。原来全机架有十一个字号，相邻两档差 0.5px——
+     屏幕上分辨不出来，所谓层级其实是靠颜色在扛。 */
+  --t-micro: 10.5px; /* 小铭牌、通电格里的紧凑按钮 */
+  --t-label: 11px; /* 丝印：字段名、按钮、挡位、抽屉标题、机读小字 */
+  --t-sub: 12px; /* 次级：量化读数、次级名字、时间 */
+  --t-body: 14px; /* 正文：动物名、选项、说明句、段落标题、空态 */
+  --t-name: 15px; /* 铭牌 */
+  --t-address: 16px; /* 凹槽读数窗 */
+
+  /* 字距：只有三个值，每个都有理由。原来同一个「刻上去的大写标签」身份
+     在六个地方分别写着 0.11 / 0.12 / 0.13 / 0.15 / 0.16 / 0.17 / 0.19em，
+     那不是层级，是七次各调各的。
+     汉字一字正好一 em（实测：100px 下「保」= 100px），而字距加在每个字
+     后面——0.16em 会把「供应商」拆成三块互不相连的笔画，还平白占宽度。
+     所以字距跟着语言走。这是 :lang() 的活，不该让每个组件各自去改。 */
+  --track-label: 0.14em; /* 全部刻上去的大写拉丁标签：丝印、按钮、档位、字段名 */
+  --track-tag: 0.09em; /* 小铭牌：字号已经最小，再拉开就塞不进 132px 的格子 */
+  --track-head: 0.17em; /* 段落标题：最大的一档丝印，配得上多一点空气 */
+
+  --rail-h: 54px;
+  --switch-h: 44px;
+}
+
+/* 中文界面：排布不变，收回那份只为拉丁大写准备的字距。
+   铭牌（ANIMAL BIKE BENCH）和通道地址（R 2026-10-06）永远是大写拉丁记号，
+   它们不跟着变——那是这台仪器的编号，不是句子。 */
+html:lang(zh) {
+  --track-label: 0.04em;
+  --track-tag: 0.02em;
+  --track-head: 0.06em;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+html {
+  caret-color: var(--lamp);
+}
+
+body {
+  margin: 0;
+  background: var(--room);
+  color: var(--silk);
+  font-family: var(--font-silk);
+  font-variation-settings: 'wdth' 92;
+  font-size: var(--t-body);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* 浏览器自带的那一层也属于这个世界 */
+::selection {
+  background: var(--lamp);
+  color: #14130f;
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--engrave-hi) transparent;
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--engrave-hi);
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--silk-mute);
+  background-clip: content-box;
+}
+:focus-visible {
+  outline: 2px solid var(--lamp);
+  outline-offset: 2px;
+}
+a {
+  color: var(--silk);
+  text-decoration-color: var(--engrave-hi);
+  text-underline-offset: 0.18em;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 丝印字：面板上刻上去的字，全是窄体大写                                       */
+/* -------------------------------------------------------------------------- */
+
+.silk {
+  font-family: var(--font-silk);
+  font-variation-settings: 'wdth' 74;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--track-label);
+  font-size: var(--t-label);
+  color: var(--silk-mute);
+  white-space: nowrap;
+}
+.silk-hi {
+  color: var(--silk-dim);
+}
+/* 段落标题是丝印里最高的一档：比字段名大一档、窄一档、亮一档。
+   原来它和每一个字段名同字号、同宽度、同颜色——面板上三个标题没有身份，
+   和它们下面那十几个标签读起来是同一句话。 */
+.bay-head .silk {
+  font-variation-settings: 'wdth' 68;
+  font-size: var(--t-body);
+  letter-spacing: var(--track-head);
+  color: var(--silk);
+}
+/* 字号已经最小的一档丝印，用在空态和故障画面里：那里是一句要说给人听的话，
+   不是刻在面板上的一行标签，所以它得能折行。 */
+.silk-note {
+  white-space: normal;
+  text-wrap: balance;
+}
+
+/* 「供应商 · 模型名」这类标识串：不是刻上去的大写标签，也不是量化读数，
+   所以既不大写也不拉开——它只要老老实实念出自己是谁。 */
+.silk-plain {
+  font-family: var(--font-silk);
+  font-variation-settings: 'wdth' 92;
+  font-weight: 400;
+  font-size: var(--t-sub);
+  letter-spacing: 0.02em;
+  color: var(--silk-mute);
+  white-space: nowrap;
+}
+
+/* 用来把一行里的东西推到两端 */
+.spacer {
+  flex: 1;
+  min-width: 8px;
+}
+
+/* 读数：所有量化事实都走这里 */
+.read {
+  font-family: var(--font-read);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  font-size: var(--t-sub);
+  letter-spacing: 0.01em;
+}
+.read-lg {
+  font-family: var(--font-read);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 指示灯                                                                      */
+/* -------------------------------------------------------------------------- */
+
+.lamp {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+  background: #26251f;
+  box-shadow: inset 0 0 0 1px #000;
+}
+.lamp.ok {
+  background: var(--ok);
+  box-shadow:
+    0 0 5px rgba(143, 170, 98, 0.55),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.45);
+}
+.lamp.warn {
+  background: var(--warn);
+  box-shadow:
+    0 0 5px rgba(200, 134, 47, 0.6),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.45);
+}
+.lamp.fault {
+  background: var(--fault);
+  box-shadow:
+    0 0 5px rgba(228, 100, 63, 0.6),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.45);
+}
+.lamp.live {
+  background: var(--lamp);
+  box-shadow:
+    0 0 8px rgba(240, 160, 32, 0.7),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.4);
+  animation: lamp-strike 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* 这个世界唯一一个编排好的动作：灯丝亮起来 */
+@keyframes lamp-strike {
+  0% {
+    opacity: 0;
+    filter: blur(3px);
+    transform: scale(0.55);
+  }
+  42% {
+    opacity: 1;
+    filter: blur(1.1px);
+    transform: scale(1.08);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: scale(1);
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* 机架整体布局                                                                */
+/* -------------------------------------------------------------------------- */
+
+.bench {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 348px;
+  height: 100%;
+  background: var(--room);
+}
+
+.bay {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.rack-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 顶部总线条                                                                  */
+/* -------------------------------------------------------------------------- */
+
+.busbar {
+  flex: none;
+  height: var(--rail-h);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 16px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--engrave);
+}
+
+.nameplate {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding-right: 16px;
+  border-right: 1px solid var(--engrave);
+  min-width: 0;
+}
+.nameplate b {
+  font-family: var(--font-silk);
+  font-variation-settings: 'wdth' 68;
+  font-weight: 800;
+  font-size: var(--t-name);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--silk);
+  white-space: nowrap;
+}
+.nameplate span {
+  font-size: var(--t-sub);
+  color: var(--silk-mute);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.busbar .spacer {
+  flex: 1;
+  min-width: 8px;
+}
+
+/* 总线条右端：正在测那一路的读数。指针走到哪一格，这里就报哪一格——
+   所以被跟踪的通道在网格、总线条、标本页三处同时被标记。 */
+.bus-track {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  min-width: 0;
+  border: 1px solid var(--engrave);
+  background: var(--well);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.65);
+}
+.bus-track[data-live='true'] {
+  border-color: var(--lamp);
+}
+.bus-track .addr {
+  font-family: var(--font-read);
+  font-size: var(--t-sub);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--silk);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.bus-track[data-live='true'] .addr {
+  color: var(--lamp);
+}
+.bus-track .who {
+  font-size: var(--t-sub);
+  color: var(--silk-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bus-track .who.dim {
+  color: var(--silk-mute);
+}
+.bus-track .read {
+  white-space: nowrap;
+}
+
+/* 凹槽里的读数窗 */
+.window {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  background: var(--well);
+  border: 1px solid var(--engrave);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.65);
+  padding: 4px 10px;
+  min-width: 0;
+}
+.window .read-lg {
+  font-size: var(--t-address);
+  color: var(--silk);
+}
+.window.hot .read-lg {
+  color: var(--lamp);
+}
+
+/* -------------------------------------------------------------------------- */
+/* 拨档开关（分段选择）—— 选中那档是陷进去的，不是亮起来的                       */
+/* -------------------------------------------------------------------------- */
+
+.sw {
+  display: inline-flex;
+  background: var(--well);
+  border: 1px solid var(--engrave);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+  flex: none;
+  /* 凹槽永远只比里面的挡位宽 2px（左右各 1px 刻线）。光靠 flex:none 不够：
+     在 .field 这种纵向 flex 里，flex-none 管的是主轴=高度，宽度是交叉轴，
+     仍会被 align-items:stretch 拉到整栏 315px，挡位挤在左边、右边空 181px。
+     用 fit-content 把宽度钉死在内容上，且不动 align-self——那样会把总线条
+     里垂直居中的拨档顶到上沿。 */
+  width: fit-content;
+}
+.sw > button {
+  appearance: none;
+  border: 0;
+  border-right: 1px solid var(--engrave);
+  background: transparent;
+  color: var(--silk-mute);
+  font-family: var(--font-silk);
+  font-variation-settings: 'wdth' 76;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--track-label);
+  font-size: var(--t-label);
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: color 0.14s ease-out;
+  white-space: nowrap;
+}
+.sw > button:last-child {
+  border-right: 0;
+}
+.sw > button:hover {
+  color: var(--silk-dim);
+}
+.sw > button[aria-pressed='true'] {
+  background: #0b0b0a;
+  color: var(--lamp);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.8),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+}
+.sw > button:disabled {
+  color: #4a4842;
+  cursor: not-allowed;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 筛选横杆                                                                    */
+/* -------------------------------------------------------------------------- */
+
+.rail {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 8px 16px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--engrave);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+.rail-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.rail-sep {
+  width: 1px;
+  align-self: stretch;
+  background: var(--engrave);
+  margin: 2px 4px;
+  flex: none;
+}
+
+/* 供应商挡位：一个档案一个位置。
+   用 1px 缝隙当分隔线（不是按钮的 border-right），所以折行之后每一段
+   依然是被刻开的，机器感不会因为换行就散掉。名字必须看得全——
+   要比较的就是「哪一家」，把名字截成「南…」等于把这个控件废掉。 */
+.detents {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+  background: var(--engrave);
+  border: 1px solid var(--engrave);
+  padding: 1px;
+  max-width: 100%;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+.detents > button {
+  appearance: none;
+  border: 0;
+  background: var(--well);
+  color: var(--silk-mute);
+  font-family: var(--font-silk);
+  font-variation-settings: 'wdth' 88;
+  font-size: var(--t-body);
+  padding: 5px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  max-width: 230px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.14s ease-out;
+}
+.detents > button:hover {
+  color: var(--silk-dim);
+}
+.detents > button[aria-pressed='true'] {
+  background: #0b0b0a;
+  color: var(--lamp);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.8),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* 题池选择：选项太多，老实用一个下拉，但把它做成面板上的槽 */
+select,
+input[type='text'],
+input[type='password'],
+input[type='number'],
+textarea {
+  appearance: none;
+  background: var(--well);
+  border: 1px solid var(--engrave);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+  color: var(--silk);
+  font-family: var(--font-silk);
+  font-variation-settings: 'wdth' 92;
+  font-size: var(--t-body);
+  padding: 6px 9px;
+  min-width: 0;
+  border-radius: 0;
+}
+select {
+  padding-right: 26px;
+  background-image: linear-gradient(45deg, transparent 50%, var(--silk-mute) 50%),
+    linear-gradient(135deg, var(--silk-mute) 50%, transparent 50%);
+  background-position:
+    calc(100% - 14px) calc(50% + 1px),
+    calc(100% - 9px) calc(50% + 1px);
+  background-size:
+    5px 5px,
+    5px 5px;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+select option {
+  background: var(--panel);
+  color: var(--silk);
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--silk-mute);
+}
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  border-color: var(--lamp);
+  outline: none;
+  box-shadow:
+    inset 0 1px 3px rgba(0, 0, 0, 0.6),
+    0 0 0 1px var(--lamp);
+}
+textarea {
+  font-family: var(--font-read);
+  font-size: var(--t-sub);
+  line-height: 1.6;
+  resize: vertical;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 机架与通道格                                                                */
+/* -------------------------------------------------------------------------- */
+
+.rack {
+  --ch-min: 220px;
+  padding: 0 0 40px;
+}
+.rack[data-size='s'] {
+  --ch-min: 148px;
+}
+.rack[data-size='m'] {
+  --ch-min: 220px;
+}
+.rack[data-size='l'] {
+  --ch-min: 320px;
+}
+
+.rack-band {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 16px 8px;
+  position: sticky;
+  top: 0;
+  background: linear-gradient(var(--room) 72%, rgba(12, 12, 11, 0));
+  z-index: 3;
+}
+.rack-band .rule {
+  flex: 1;
+  height: 1px;
+  background: var(--engrave);
+  min-width: 12px;
+}
+.rack-band .addr {
+  font-family: var(--font-read);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--silk-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.rack-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--ch-min), 1fr));
+  gap: 0;
+  margin: 0 16px;
+  border-top: 1px solid var(--engrave);
+  border-left: 1px solid var(--engrave);
+}
+
+/* 一个通道 = 面板上的一格。它是机架的一格，不是一张浮起来的卡片。
+   行高靠两件事保持整齐：画面固定 4:3，铭牌槽位固定一行高。
+   两者都是常数，所以整面机架每一格一样高——截出来的图像一张真的机架，
+   而不是一堆高矮不一的卡片。 */
+.ch {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  background: var(--panel);
+  border: 0;
+  border-right: 1px solid var(--engrave);
+  border-bottom: 1px solid var(--engrave);
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  transition: background 0.15s ease-out;
+  min-width: 0;
+}
+.ch:hover {
+  background: var(--panel-hi);
+}
+.ch:hover .ch-plate {
+  background: rgba(255, 255, 255, 0.014);
+}
+.ch[data-tracked='true'] {
+  background: var(--panel-hi);
+  outline: 1px solid var(--lamp);
+  outline-offset: -1px;
+  z-index: 2;
+}
+
+/* 左上角指示灯，右上角通道地址——一格单独被截走时，这一行就是它的编号。 */
+.ch-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 9px 5px;
+  min-width: 0;
+}
+.ch-no {
+  font-family: var(--font-read);
+  font-size: var(--t-sub);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--silk);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ch-head .spacer {
+  flex: 1;
+  min-width: 4px;
+}
+.ch-dur {
+  font-family: var(--font-read);
+  font-size: var(--t-label);
+  color: var(--silk-mute);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* 作品原样放在这里：不加底色、不裁切、不套框。
+   4:3 是常数，所以同一列里每一格的画面大小完全一致——失败的格子和成功的
+   格子一样大，不会因为「没有图」就显得矮一截或者小一圈。 */
+.ch-plate {
+  flex: none;
+  aspect-ratio: 4 / 3;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: transparent;
+}
+.ch-plate img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.ch-silk {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px 9px 9px;
+  border-top: 1px solid var(--engrave);
+  min-width: 0;
+}
+/* 格子里的四行读作一条由重到轻的链：画的是什么 → 哪一路中转 → 哪个模型 → 什么时候。
+   字号 14 / 12 / 11 / 11，色阶 silk / silk-dim / silk-mute / silk-mute，族 Archivo→Mono。
+   权重在这条链上帮不上忙：汉字只有常规和粗体两档，600 落在汉字上是空转
+   （实测雅黑 400 与 700 的墨量完全相同），所以层级只能靠字号、色阶、字族来扛。 */
+.ch-animal {
+  font-size: var(--t-body);
+  font-weight: 600;
+  font-variation-settings: 'wdth' 92;
+  color: var(--silk);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ch-prov {
+  font-size: var(--t-sub);
+  color: var(--silk-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ch-model {
+  font-family: var(--font-read);
+  font-size: var(--t-label);
+  color: var(--silk-mute);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+/* 「什么时候」和通道号一样是这格的坐标。单独截一格发出去时，
+   上面那行 R 2026-10-06 的机架带不会被一起截走，所以日期必须长在格子里。 */
+.ch-when {
+  font-family: var(--font-read);
+  font-size: var(--t-label);
+  color: var(--silk-mute);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 标签：陈述事实，不打分。不是药丸，是刻在面板上的小铭牌。
+   槽位永远留着（哪怕这条记录一个标记都没有），这样有标记的格子和没标记的
+   格子一样高——机架的行高不能因为「这一家恰好没出错」就变矮。 */
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 5px;
+  min-height: 19px;
+  align-content: flex-start;
+}
+.tag {
+  font-family: var(--font-silk);
+  font-variation-settings: 'wdth' 76;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--track-tag);
+  font-size: var(--t-micro);
+  /* 13px 行高 + 上下各 2px 内衬 + 上下各 1px 刻线 = 19px，正好填满槽位。
+     槽位高度是常数，机架的行高才是常数。 */
+  line-height: 13px;
+  padding: 2px 5px;
+  border: 1px solid currentColor;
+  color: var(--warn);
+  white-space: nowrap;
+}
+.tag.fault {
+  color: var(--fault);
+}
+
+/* 渲染不出来时，格子照旧占位。空画面是这个工具能拿到的最坏结果，
+   所以它不能是屏幕上最安静的那一格。
+   底色跟着事实走：「浏览器渲染失败」是真出事（红），「模型压根没给 SVG」
+   和「截断了」是琥珀——画面、指示灯、铭牌三处同色，一格之内不自相矛盾。 */
+.broken {
+  display: grid;
+  place-items: center;
+  gap: 6px;
+  width: 100%;
+  height: 100%;
+  padding: 12px;
+  text-align: center;
+  color: var(--warn);
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(200, 134, 47, 0.11) 0 7px,
+    transparent 7px 14px
+  );
+}
+.broken.fault {
+  color: var(--fault);
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(228, 100, 63, 0.11) 0 7px,
+    transparent 7px 14px
+  );
+}
+/* .silk / .note 自带颜色，会把故障色盖掉——这里显式继承，让空画面说自己的话 */
+.broken .silk,
+.broken .note,
+.broken .read {
+  color: inherit;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 通电中的通道：占两格，流式输出就在格子里                                    */
+/* -------------------------------------------------------------------------- */
+
+.ch.live {
+  grid-column: span 2;
+  cursor: default;
+  background: var(--panel-hi);
+  outline: 1px solid var(--lamp);
+  outline-offset: -1px;
+  z-index: 2;
+}
+@media (max-width: 700px) {
+  .ch.live {
+    grid-column: span 1;
+  }
+}
+
+.live-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+.prompt-line {
+  padding: 0 10px 9px;
+  font-size: var(--t-body);
+  line-height: 1.5;
+  color: var(--silk-dim);
+  border-bottom: 1px solid var(--engrave);
+}
+.prompt-line b {
+  display: block;
+  margin-bottom: 3px;
+  white-space: normal;
+}
+
+.stream {
+  font-family: var(--font-read);
+  font-size: var(--t-sub);
+  line-height: 1.62;
+  color: var(--silk-dim);
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow: auto;
+  max-height: 300px;
+  padding: 8px 10px;
+  background: var(--well);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+  margin: 8px 10px 10px;
+}
+.stream.reasoning {
+  color: #8a7f68;
+  border-left: 0;
+}
+.stream-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px 0;
+}
+.stream-head .rule {
+  flex: 1;
+  height: 1px;
+  background: var(--engrave);
+}
+
+/* -------------------------------------------------------------------------- */
+/* 右侧控制面板                                                                */
+/* -------------------------------------------------------------------------- */
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--panel);
+  border-left: 1px solid var(--engrave);
+}
+.panel-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.bay-section {
+  padding: 14px 16px 18px;
+  border-bottom: 1px solid var(--engrave);
+}
+.bay-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 11px;
+}
+.bay-head .rule {
+  flex: 1;
+  height: 1px;
+  background: var(--engrave);
+}
+
+/* 档案名册：一行一个工位 */
+.roster {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--engrave);
+  background: var(--well);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+.slot {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--engrave);
+  cursor: pointer;
+  background: transparent;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  width: 100%;
+  transition: background 0.14s ease-out;
+}
+.slot:last-child {
+  border-bottom: 0;
+}
+.slot:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+.slot[aria-pressed='true'] {
+  background: #0a0a09;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.75);
+}
+.slot-body {
+  flex: 1;
+  min-width: 0;
+  display: block;
+}
+.slot-name {
+  display: block;
+  font-size: var(--t-body);
+  font-weight: 600;
+  color: var(--silk);
+  /* 工位名不截断：要比较的就是「哪一家」，把名字截成「南…」等于把这个
+     控件废掉。名册不是必须等高的网格，放不下就让它长一行。 */
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.slot[aria-pressed='true'] .slot-name {
+  color: var(--lamp);
+}
+.slot-sub {
+  display: block;
+  font-family: var(--font-read);
+  font-size: var(--t-label);
+  line-height: 1.45;
+  color: var(--silk-mute);
+  /* 副行是 `{模型} · {协议} · T= · MAX=`，其中模型名可以长到 32 字符。
+     实测 `deepseek-v3.2-reasoner-preview · OI · T=0.7 · TOPP=0.95 · MAX=32768`
+     在 348px 栏里超出 151px，收到 10.5px 仍超出 129px——缩字号救不回来。
+     量化事实不许被省略号吃掉，所以这里允许折行。 */
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 名册下面这条槽。平时露的是「编辑 / 删除」两颗按钮；按下「新建」或
+   「编辑供应商」之后，按钮从槽口向上退出，表单从同一条槽里升上来。
+   两块同时动，所以下面的「本次运行」只被推一次，不会被先顶上去一截再推下来。
+   两块都得常驻在树里才有「关」可演：条件卸载只演得了开，演不了高度收回去那一程。
+   用的是和 `.fold` 同一套机制（`interpolate-size` + `block-size`），
+   所以这一台仪器里只有一种「抽屉」的读感，没有第二套。 */
+.prov-slot {
+  /* `block-size: auto` 默认不可插值。这是继承属性，声明在槽上，
+     两个 wrapper 就都拿得到——不必为了一个表单把整份文档的尺寸插值全打开。 */
+  interpolate-size: allow-keywords;
+}
+.prov-slot-out,
+.prov-slot-in {
+  overflow: clip;
+  transition:
+    block-size 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    visibility 0.18s;
+  /* 焦点圈是 2px 圈 + 2px 偏移，画在盒子外面。盒子的边正好是裁切边，
+     所以把裁切区放大一点，别把唯一的焦点提示裁掉。它不参与布局。 */
+  overflow-clip-margin: 10px;
+}
+/* 两侧在「关」这件事上不是对称的，不能被同一条规则概括：
+   收起时按钮要露、表单要藏；展开时反过来。所以 visibility 分开写，
+   谁被藏起来就写谁——写错一边的后果是那一边在常态下整块消失。
+   visibility 按步插值：整段过渡里它都还是 visible，只在最后一刻翻过去，
+   所以藏起来的过程不会半路突然消失。这也顺手把「关着的表单不进 Tab 序列」
+   这条原本由条件卸载免费提供的行为补了回来。 */
+.prov-slot-out {
+  block-size: auto;
+  visibility: visible;
+  /* 挡住里面那个 margin-top 穿出去。穿出去的话槽高就算不准，
+     按钮会在展开态被下沿切掉一截。 */
+  display: flow-root;
+}
+.prov-slot-in {
+  block-size: 0;
+  visibility: hidden;
+}
+.prov-slot.open .prov-slot-out,
+.prov-slot.open .prov-slot-in {
+  transition-duration: 0.26s;
+}
+.prov-slot.open .prov-slot-out {
+  block-size: 0;
+  visibility: hidden;
+}
+.prov-slot.open .prov-slot-in {
+  block-size: auto;
+  visibility: visible;
+}
+
+/* 内容不跟着盒子一起淡：盒子是槽口，内容是那页纸。
+   表单往上走一小步进到位，按钮往上退出去——两块朝同一个方向，
+   读起来才是同一张纸在抽动；一进一退会像一边在进来、一边在逃跑。 */
+.prov-form {
+  padding-top: 12px; /* 原来挂在行内 style 上的 marginTop，收进样式表 */
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.prov-slot-out > .row {
+  transition:
+    opacity 0.16s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.prov-slot.open .prov-form {
+  opacity: 1;
+  transform: translateY(0);
+  transition-duration: 0.26s;
+}
+.prov-slot.open .prov-slot-out > .row {
+  opacity: 0;
+  transform: translateY(-5px);
+}
+
+/* 面板上的按钮：按下去有行程 */
+.btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-family: var(--font-silk);
+  font-variation-settings: 'wdth' 82;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--track-label);
+  font-size: var(--t-label);
+  padding: 8px 12px;
+  color: var(--silk-dim);
+  background: var(--panel-hi);
+  border: 1px solid var(--engrave-hi);
+  box-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.055);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 0.14s ease-out,
+    color 0.14s ease-out;
+}
+.btn:hover:not(:disabled) {
+  color: var(--silk);
+  background: #262521;
+}
+.btn:active:not(:disabled) {
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8);
+  transform: translateY(1px);
+}
+.btn:disabled {
+  color: #4d4b45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.btn.quiet {
+  background: transparent;
+  border-color: var(--engrave);
+  box-shadow: none;
+}
+.btn.quiet:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--silk);
+}
+.btn.wide {
+  width: 100%;
+}
+.btn.arm {
+  color: var(--lamp);
+  border-color: #5a4520;
+}
+.btn.arm:hover:not(:disabled) {
+  background: #241d10;
+  color: var(--lamp);
+}
+.btn.halt {
+  color: var(--fault);
+  border-color: #5a2f22;
+  /* 闩扣下去这一程比 hover 慢一档：它是「我换了一个状态」，不是一次掠过。
+     0.18s 落在例行状态变化（150–300ms）的下沿，仍然干脆；缓动沿用这台仪器
+     唯一的那条曲线。这里补上 background/border-color/box-shadow 三条 ——
+     原本只有 background、color 在过渡，闩要动的正是前两条。
+     刻意不写 transform：那 1px 是 :active 的瞬时按压，别的按钮都是瞬时的，
+     这一颗不该例外，否则它会永远比并排的「编辑供应商」低一格。 */
+  transition:
+    background 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn.halt:hover:not(:disabled) {
+  background: #241512;
+}
+/* 两段式删除的第一段：键已经扣下去了，但还没通电。
+   「高亮」在这个世界里只有两种写法 —— 凹槽加深，或刻线提亮 —— 所以这里两者一起：
+   键座沉进 `#241512`（故障橙压到 12%，本来就是「按下去」那一档），`inset` 加深成
+   真凹槽，那 1px 边从 `#5a2f22` 提亮到 `#8a4630`。
+   不发光、不铺面积、不加光晕 —— The Light-Only-From-Lamps Rule 对故障橙同样成立：
+   它是字和刻线的颜色，不是灯。
+   这一条与 `.sw` / `.detents` / `.slot` 的选中态是同一句话：**凹进去，不放大、不加粗**，
+   读起来像一个真的被按进去的挡位，而不是一个被高亮了的按钮。 */
+.btn.halt.armed,
+.btn.halt.armed:hover:not(:disabled) {
+  background: #241512;
+  border-color: #8a4630;
+  color: var(--fault);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.8),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+}
+.btn.xl {
+  font-size: var(--t-body);
+  padding: 12px 14px;
+  letter-spacing: var(--track-head);
+}
+/* 通电格里的紧凑按钮：那一格已经被画面和流式输出占满，按钮得让位。
+   原来这两颗按钮是组件里的两个行内 fontSize（10.5 和 10），
+   同一个角色两套尺寸——收到这里，成为一档有名有姓的尺寸。 */
+.btn.dense {
+  font-size: var(--t-micro);
+  padding: 3px 8px;
+  gap: 5px;
+}
+.btn.icon {
+  padding: 6px 8px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 9px;
+  min-width: 0;
+}
+.field > label {
+  font-family: var(--font-silk);
+  font-variation-settings: 'wdth' 74;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--track-label);
+  font-size: var(--t-label);
+  color: var(--silk-mute);
+}
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--t-body);
+  line-height: 1.45;
+  color: var(--silk-dim);
+  padding: 5px 0;
+  cursor: pointer;
+  user-select: none;
+}
+.check input {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  flex: none;
+  background: var(--well);
+  border: 1px solid var(--engrave-hi);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.check input:checked {
+  background: var(--well);
+  border-color: var(--lamp);
+}
+.check input:checked::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--lamp);
+  box-shadow: 0 0 4px rgba(240, 160, 32, 0.7);
+}
+
+/* 盘上路径：这是一条机读事实，等宽是对的 */
+.pathline {
+  font-family: var(--font-read);
+  font-size: var(--t-label);
+  color: var(--silk-mute);
+  line-height: 1.7;
+  word-break: break-all;
+  margin-top: 10px;
+}
+
+/* 说给人听的短句（「还没有供应商」「只影响这一次运行」「原始响应没有留存」）。
+   原来是借 .pathline 渲染的——于是五句中文散文全部显示成了等宽字，
+   只因为「路径也用这个类」。等宽在这里不是风格，是把一句话伪装成一段数据。
+   这是正文角色：Archivo，能折行，行宽有上限。 */
+.note {
+  font-size: var(--t-body);
+  line-height: 1.5;
+  color: var(--silk-mute);
+  max-width: 46ch;
+  text-wrap: pretty;
+  margin-top: 10px;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 标本页：一个巨型样本 + 边缘极小的等宽事实                                    */
+/* -------------------------------------------------------------------------- */
+
+.sheet-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 59;
+  /* 遮罩只是一层颜色，不接指针：外面那一圈留白由 .sheet-plate 负责，
+     点它才算「点到了面板外面」。 */
+  pointer-events: none;
+  background: rgba(6, 6, 6, 0.62);
+  animation: scrim-in 0.2s ease-out both;
+}
+.sheet-scrim.leaving {
+  animation: scrim-out 0.15s ease-in both;
+}
+@keyframes scrim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes scrim-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* 面板落位的容器：只负责居中、留白和点外关闭。铺满视口。
+   这一圈留白也是「世界还在」的证据——机架暗在底下，没有消失。 */
+.sheet-plate {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  /* 轨道给满，面板的 `height: min(820px, 100%)` 才有确定的百分比可算。
+     只写 place-items 的话轨道是 max-content，100% 会解析不出来。 */
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  place-items: center;
+  padding: clamp(12px, 3vh, 44px) clamp(12px, 3vw, 56px);
+}
+.sheet-plate.leaving {
+  pointer-events: none;
+}
+
+/* 标本页：一块摆到台面上的样本板。
+   这个系统原本声明「没有浮起来的东西」，弹窗是唯一的例外——所以它按
+   现有的影子词汇落地：**有偏移、有柔化、不带任何颜色**，和 `.toast`
+   同一套。不是光晕，是一块板压下去的重量。 */
+.sheet {
+  position: relative;
+  width: min(1240px, 100%);
+  height: min(820px, 100%);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--room);
+  border: 1px solid var(--engrave-hi);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.66);
+  animation: sheet-seat 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+/* 退场比进场快：关门不该让人等。 */
+.sheet-plate.leaving .sheet {
+  animation: sheet-lift 0.18s cubic-bezier(0.4, 0, 1, 1) both;
+}
+/* 「摆上去」，不是「飞进来」：一段极短的垂直落位加上透明度。
+   只有 transform 与 opacity，不碰布局属性，也不用模糊。
+   注意：这条曲线与 .fold 的开合共用同一支自然减速，全工具的动效
+   词汇因此只有两种速度。 */
+@keyframes sheet-seat {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes sheet-lift {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+.sheet-head {
+  flex: none;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 14px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--engrave);
+  min-width: 0;
+}
+.sheet-head .spacer {
+  flex: 1;
+  min-width: 6px;
+}
+/* 标本自己的名字，是这一行里最亮的一档丝印。
+   原来它靠组件里一句 inline `color: var(--silk)` 撑着——一句内联样式在替
+   CSS 补一个缺失的角色。角色回到这里。 */
+.sheet-head .silk {
+  font-size: var(--t-body);
+  letter-spacing: var(--track-head);
+  color: var(--silk);
+}
+.sheet-addr {
+  font-family: var(--font-read);
+  font-size: var(--t-body);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--lamp);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.sheet-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 306px;
+}
+.sheet-main {
+  overflow: auto;
+  padding: 18px;
+  min-width: 0;
+}
+.sheet-facts {
+  overflow: auto;
+  padding: 16px;
+  border-left: 1px solid var(--engrave);
+  background: var(--panel);
+}
+
+/* 巨型样本：不加底色、不裁切 */
+.plate {
+  border: 1px solid var(--engrave);
+  background: transparent;
+  display: grid;
+  place-items: center;
+  min-height: 320px;
+}
+.plate iframe {
+  width: 100%;
+  height: min(64vh, 660px);
+  border: 0;
+  display: block;
+  background: transparent;
+}
+
+/* 量化事实：标签在左，读数右对齐成一条数字边 */
+.facts {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0;
+  margin: 0;
+}
+.facts dt {
+  font-family: var(--font-silk);
+  font-variation-settings: 'wdth' 76;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--track-label);
+  font-size: var(--t-label);
+  color: var(--silk-mute);
+  padding: 6px 10px 6px 0;
+  border-bottom: 1px solid rgba(45, 44, 40, 0.7);
+  white-space: nowrap;
+  align-self: center;
+}
+.facts dd {
+  font-family: var(--font-read);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-sub);
+  color: var(--silk);
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(45, 44, 40, 0.7);
+  text-align: right;
+  word-break: break-all;
+  margin: 0;
+}
+.facts dd.hot {
+  color: var(--fault);
+}
+.facts dd.dim {
+  color: var(--silk-mute);
+}
+
+/* 标本页读数栏：行线由单元格自身画满，标签与读数同高 */
+.sheet-facts .facts {
+  align-items: stretch;
+}
+.sheet-facts .facts dt {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  padding: 8px 10px 8px 0;
+  font-size: var(--t-label);
+  line-height: 1.2;
+  border-bottom: 1px solid var(--engrave);
+}
+.sheet-facts .facts dd {
+  padding: 8px 0;
+  font-size: var(--t-sub);
+  line-height: 1.5;
+  border-bottom: 1px solid var(--engrave);
+}
+
+/* 本次运行读数：竖线由标签画，行线交给右栏，读数与标签同高 */
+.run-facts {
+  margin-bottom: 12px;
+}
+.run-facts dt {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  padding: 8px 10px 8px 0;
+  font-size: var(--t-label);
+  line-height: 1.2;
+  border-bottom: 0;
+  border-right: 1px solid var(--engrave);
+}
+.run-facts dd {
+  padding: 8px 0 8px 12px;
+  font-size: var(--t-sub);
+  line-height: 1.5;
+  text-align: left;
+  border-bottom: 0;
+}
+
+/* 刻在面板上的抽屉。
+   开合不是淡入淡出：内容被槽口切着长出来，像抽屉从凹槽里滑出——
+   这台仪器里没有东西「浮起来」，只有东西从井里升起来。 */
+.fold {
+  border: 1px solid var(--engrave);
+  margin-top: 12px;
+  background: var(--panel);
+  /* 抽屉要能从 0 长到内容高度，而 `block-size: auto` 默认不可插值。
+     这是继承属性，声明在抽屉上，`::details-content` 就能拿到——
+     不必为了一个折叠块把整份文档的尺寸插值全打开。 */
+  interpolate-size: allow-keywords;
+}
+/* 关上的瞬间内容必须还留在渲染树里，否则高度已经没了、无从过渡；
+   content-visibility 的 allow-discrete 就是为了把这个拆除动作推迟到过渡结束。
+   关闭比打开快（退出总是比进入快），所以时长写在两个状态上而不是一处。 */
+.fold::details-content {
+  block-size: 0;
+  overflow: clip;
+  opacity: 0;
+  transition:
+    block-size 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    content-visibility 0.18s allow-discrete;
+}
+.fold[open]::details-content {
+  block-size: auto;
+  opacity: 1;
+  transition-duration: 0.26s;
+}
+.fold > summary {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 12px;
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--font-silk);
+  font-variation-settings: 'wdth' 76;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--track-label);
+  font-size: var(--t-label);
+  color: var(--silk-dim);
+}
+.fold > summary::-webkit-details-marker {
+  display: none;
+}
+.fold > summary::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-right: 1px solid var(--silk-mute);
+  border-bottom: 1px solid var(--silk-mute);
+  transform: rotate(-45deg);
+  transition: transform 0.16s ease-out;
+}
+.fold[open] > summary::before {
+  transform: rotate(45deg);
+}
+.fold > summary:hover {
+  color: var(--silk);
+}
+.fold-body {
+  padding: 12px;
+  border-top: 1px solid var(--engrave);
+}
+/* 内容本身再向外让一小步，抽屉才有「滑出」而不是「撑开」的读感。
+   只有位移和透明度，不碰发光、不投影——深度在这个世界里只由凹槽表达。 */
+@keyframes fold-out {
+  from {
+    transform: translateY(-4px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+.fold[open] .fold-body {
+  animation: fold-out 0.26s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+pre.code {
+  margin: 0;
+  font-family: var(--font-read);
+  font-size: var(--t-sub);
+  line-height: 1.65;
+  color: var(--silk-dim);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 420px;
+  overflow: auto;
+  background: var(--well);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+  padding: 10px;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 空态与提示                                                                  */
+/* -------------------------------------------------------------------------- */
+
+.empty {
+  padding: 56px 20px;
+  text-align: center;
+  color: var(--silk-mute);
+  font-size: var(--t-body);
+  line-height: 1.5;
+}
+.empty .silk {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  z-index: 90;
+  background: var(--panel);
+  border: 1px solid var(--engrave-hi);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+  color: var(--silk);
+  font-size: var(--t-body);
+  padding: 9px 15px;
+  max-width: min(70vw, 62ch);
+}
+.toast.error {
+  color: var(--fault);
+  border-color: #5a2f22;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 窄屏：机架塌成一条通道带                                                    */
+/* -------------------------------------------------------------------------- */
+
+@media (max-width: 1040px) {
+  .bench {
+    grid-template-columns: minmax(0, 1fr) 300px;
+  }
+  /* 副行的字号不在这里退档。曾经这里写着 `.slot-sub { font-size: 10.5px }`，
+     因为「退半档」是当时唯一能让参数串塞进 300px 的办法——但那是假的：
+     实测 `claude-sonnet-4-5-20250929 · ANTH · T=1 · MAX=64000` 在 348px 栏里
+     就已经超出 37px，缩到 10.5px 仍超出 20px。字号救不了它，折行才行。
+     副行现在允许折行，于是这一档只是为迁就栏宽而存在的第七个字号，删掉。 */
+}
+
+@media (max-width: 900px) {
+  .bench {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    height: auto;
+    min-height: 100%;
+  }
+  .bay {
+    min-height: 70vh;
+  }
+  .panel {
+    border-left: 0;
+    border-top: 1px solid var(--engrave);
+  }
+  .sheet-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sheet-facts {
+    border-left: 0;
+    border-top: 1px solid var(--engrave);
+  }
+  .rail {
+    gap: 8px;
+  }
+  .detents {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 620px) {
+  .rack-grid {
+    margin: 0 10px;
+  }
+  /* 密度档位是按桌面列宽定的；到手机上要重新给，否则 'm' 档的 220px
+     在 390px 屏上只剩一列——属性选择器的权重比这里的选择器高，光改
+     .rack 的默认值是改不动的。 */
+  .rack,
+  .rack[data-size='s'] {
+    --ch-min: 132px;
+  }
+  .rack[data-size='m'] {
+    --ch-min: 168px;
+  }
+  .rack[data-size='l'] {
+    --ch-min: 210px;
+  }
+  /* 总线条放不下就折行，不许把读数截断——「通道 2」这种残句比没有更糟。
+     折行后各项仍在同一条基线上，读数窗之间的间隔靠 gap 保持。 */
+  .busbar {
+    height: auto;
+    min-height: var(--rail-h);
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 8px 12px;
+  }
+  .busbar .spacer {
+    display: none;
+  }
+  .nameplate {
+    border-right: 0;
+    padding-right: 0;
+  }
+  .nameplate b {
+    font-size: var(--t-body);
+    letter-spacing: var(--track-label);
+  }
+  .nameplate span {
+    display: none;
+  }
+  /* 右侧的跟踪读数在窄屏只留「是哪一路」——动物和供应商那两段让位，
+     地址不许截断（它是这一格的身份）。 */
+  .bus-track {
+    order: 9;
+    width: 100%;
+  }
+  .bus-track .who.dim {
+    display: none;
+  }
+  /* 弹窗头部在手机上放不下一整行：地址、动物名、供应商名三段都是
+     `nowrap`，加起来 440px 塞进 366px 的面板里，会把整块面板撑宽
+     70px（`overflow: hidden` 挡住看不见，但滚动位置会被焦点带偏）。
+     这里让它折行，并让位给下面那半行已经在读数里写着的供应商名。 */
+  .sheet-head {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 48px;
+    padding: 7px 12px;
+    column-gap: 10px;
+    row-gap: 3px;
+  }
+  .sheet-head .silk-plain {
+    display: none;
+  }
+  .sheet-addr {
+    min-width: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after,
+  /* 抽屉的内容是一个伪元素，`*::before / ::after` 都盖不到它。
+     少了这一条，全世界的动画都停了，只有抽屉还在慢慢长高。 */
+  .fold::details-content {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  /* 「有意替代」：抹掉位移，留住淡入淡出。
+     弹窗靠的不是那 10px 的落位，是「房间暗下去、面板亮起来」这个
+     状态变化本身——那部分必须留下，否则关掉动效就等于关掉了反馈。
+     上面那条 `*` 把时长压到 0.001ms，所以这里必须显式把时长写回来；
+     `.sheet` 比 `*` 更具体，两个都带 !important 时它赢。 */
+  .sheet {
+    animation-name: sheet-seat-calm;
+    animation-duration: 0.14s !important;
+  }
+  .sheet-plate.leaving .sheet {
+    animation-name: sheet-lift-calm;
+    animation-duration: 0.1s !important;
+  }
+  .sheet-scrim {
+    animation-name: scrim-in;
+    animation-duration: 0.14s !important;
+  }
+  .sheet-scrim.leaving {
+    animation-name: scrim-out;
+    animation-duration: 0.1s !important;
+  }
+  /* 同一条「有意替代」用在供应商表单上：抹掉位移和升降，留住淡入淡出
+     和「谁在台面上」这件事本身——关掉动效不该等于关掉反馈。
+     高度不再插值，所以这里直接把它切成两态（瞬间换高），只让两侧交叉淡化。
+     不能用简写里逐项加 !important（那是非法语法，整条声明会被丢掉）。 */
+  .prov-slot-out,
+  .prov-slot-in {
+    transition: none !important;
+  }
+  .prov-form,
+  .prov-slot-out > .row {
+    transform: none !important;
+    transition-property: opacity !important;
+    transition-duration: 0.14s !important;
+  }
+}
+@keyframes sheet-seat-calm {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes sheet-lift-calm {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}

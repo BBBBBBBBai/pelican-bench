@@ -1,0 +1,61 @@
+{
+  "onclickDivs": [
+    {
+      "id": "root",
+      "cls": "",
+      "parentTag": "BODY",
+      "isRoot": true,
+      "childCount": 1
+    }
+  ],
+  "closeBtn": null,
+  "focusVisibleRules": [
+    {
+      "sel": ":focus-visible",
+      "css": "outline: 2px solid var(--lamp); outline-offset: 2px;"
+    },
+    {
+      "sel": "input:focus-visible, select:focus-visible, textarea:focus-visible",
+      "css": "border-color: var(--lamp); outline: none; box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6),\n    0 0 0 1px var(--lamp);"
+    }
+  ],
+  "animated": [],
+  "lampBoxShadow": "rgb(0, 0, 0) 0px 0px 0px 1px inset",
+  "textScale": {
+    "root16": {
+      "docOverflowX": 0,
+      "clipped": 0,
+      "cellH": 350,
+      "railH": 89
+    },
+    "root20": {
+      "docOverflowX": 0,
+      "clipped": 0,
+      "cellH": 350,
+      "railH": 89
+    },
+    "root24": {
+      "docOverflowX": 0,
+      "clipped": 0,
+      "cellH": 350,
+      "railH": 89
+    },
+    "root32": {
+      "docOverflowX": 0,
+      "clipped": 0,
+      "cellH": 350,
+      "railH": 89
+    }
+  },
+  "pxFontSizes": {
+    "16px": 12,
+    "14px": 329,
+    "15px": 1,
+    "12px": 58,
+    "11px": 124,
+    "10.5px": 13,
+    "13.3333px": 2
+  },
+  "contrast": [],
+  "iframe": null
+}

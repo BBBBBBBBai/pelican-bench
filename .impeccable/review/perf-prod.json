@@ -1,0 +1,225 @@
+{
+  "label": "prod",
+  "url": "http://127.0.0.1:8787/",
+  "viewport": {
+    "W": 1440,
+    "H": 900,
+    "mobile": false
+  },
+  "network": {
+    "requestCount": 29,
+    "byType": {
+      "Document": 1,
+      "Stylesheet": 1,
+      "Font": 2,
+      "Script": 1,
+      "Fetch": 2,
+      "Other": 1,
+      "Image": 21
+    },
+    "totalKB": 370,
+    "fontRequests": [
+      {
+        "url": "azeret-mono-latin-BhHwRSCm.woff2",
+        "kb": 26,
+        "status": 200,
+        "fromCache": false
+      },
+      {
+        "url": "archivo-latin-DY7AcnAa.woff2",
+        "kb": 88,
+        "status": 200,
+        "fromCache": false
+      }
+    ],
+    "css": [
+      {
+        "url": "index-Bb53QOpV.css",
+        "kb": 22
+      }
+    ],
+    "scripts": [
+      {
+        "url": "index-BMnRKIM-.js",
+        "kb": 183
+      }
+    ],
+    "images": [
+      {
+        "url": "favicon.ico",
+        "kb": 1,
+        "type": "Other"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      },
+      {
+        "url": "svg",
+        "kb": 1,
+        "type": "Image"
+      }
+    ],
+    "failures": [],
+    "status4xx5xx": []
+  },
+  "timing": {
+    "ttfb": 3,
+    "domInteractive": 10,
+    "domContentLoaded": 24,
+    "loadEvent": 25,
+    "firstPaint": 92,
+    "firstContentfulPaint": 92
+  },
+  "fonts": {
+    "count": 4,
+    "list": [
+      {
+        "family": "Archivo",
+        "weight": "100 900",
+        "status": "loaded"
+      },
+      {
+        "family": "Archivo",
+        "weight": "100 900",
+        "status": "unloaded"
+      },
+      {
+        "family": "Azeret Mono",
+        "weight": "100 900",
+        "status": "loaded"
+      },
+      {
+        "family": "Azeret Mono",
+        "weight": "100 900",
+        "status": "unloaded"
+      }
+    ],
+    "allLoaded": "loaded"
+  },
+  "longTasks": [],
+  "layoutCost": {
+    "forcedReflowMs": 0
+  },
+  "rendering": {
+    "totalCells": 26,
+    "totalImgs": 20,
+    "imgsInViewport": 5,
+    "imgsDecoded": 18,
+    "imgsNotYetLoaded": 2,
+    "domNodes": 537
+  },
+  "interactionCost": {
+    "switchProviderMs": 3.6
+  },
+  "chromeMetrics": {
+    "Documents": 19,
+    "Nodes": 1330,
+    "LayoutCount": 5,
+    "RecalcStyleCount": 6,
+    "LayoutDuration": 0.038,
+    "RecalcStyleDuration": 0.005,
+    "ScriptDuration": 0.016,
+    "TaskDuration": 0.108,
+    "JSHeapUsedSize": 1736732,
+    "JSHeapTotalSize": 3145728
+  },
+  "consoleErrors": [],
+  "exceptions": []
+}

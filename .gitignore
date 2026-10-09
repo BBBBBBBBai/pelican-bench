@@ -1,0 +1,55 @@
+node_modules/
+dist/
+data/
+*.log
+.env
+
+# API Key 单独存放，绝不入库；连带把各种 .backup 副本一起挡掉
+config.local.json
+config.local*.json
+
+# 编辑器 / 工具留下的本机副本与恢复产物
+.backup/
+.acl-recovery/
+tmp-*.txt
+
+# ── 设计巡检素材 ────────────────────────────────────────────────
+# 只保留文档与量测报告（PROVENANCE.md / *.md / *.json / *.txt / 注入脚本），
+# 截图与参考图体积大且可重新生成，不入库。README 用的三张图已另存到 docs/。
+.impeccable/**/*.png
+.impeccable/**/*.webp
+.impeccable/**/config*.json
+.impeccable/live/
+
+# impeccable-live-ignore-start
+.impeccable/hook.cache.json
+.impeccable/hook.pending.json
+.impeccable/config.local.json
+.impeccable/live/server.json
+.impeccable/live/roots.json
+.impeccable/live/app-root.json
+.impeccable/live/inject-journal.json
+.impeccable/live/sessions/
+.impeccable/live/previews/
+.impeccable/live/annotations/
+.impeccable/live/artifacts/
+.impeccable/live/accept-receipts/
+.impeccable/live/locks/
+.impeccable/live/cache/
+.impeccable/live/manual-edit-apply-transaction.json
+.impeccable/live/manual-edit-events.jsonl
+.impeccable/live/manual-edit-evidence/
+.impeccable/live/pending-manual-edits.json
+.impeccable/live/deferred-svelte-component-accepts.json
+.impeccable-live.json
+.impeccable-live/
+app/.impeccable-live/
+src/.impeccable-live/
+node_modules/.impeccable-live/
+src/lib/impeccable/ImpeccableLiveRoot.svelte
+src/lib/impeccable/__runtime.js
+src/lib/impeccable/[0-9a-f]*/
+plugins/impeccable-live.client.ts
+app/plugins/impeccable-live.client.ts
+src/plugins/impeccable-live.client.ts
+# impeccable-live-ignore-end

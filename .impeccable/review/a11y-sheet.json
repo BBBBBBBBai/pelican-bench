@@ -1,0 +1,158 @@
+{
+  "divOnclick": [
+    {
+      "cls": "",
+      "parent": "",
+      "role": null,
+      "tabindex": null,
+      "label": null
+    }
+  ],
+  "cell": {
+    "tag": "BUTTON",
+    "cls": "ch",
+    "innerText": "548ms 第 26 条 河马 官方格式 · 长思考 mock-thinking 2026-10-06 04:06",
+    "ariaLabel": null,
+    "ariaPressed": null,
+    "hasImg": true,
+    "imgAlt": "",
+    "titled": true
+  },
+  "sections": [
+    {
+      "cls": "",
+      "label": null,
+      "labelledby": null,
+      "headingInside": "2026-10-06"
+    },
+    {
+      "cls": "bay-section",
+      "label": null,
+      "labelledby": null,
+      "headingInside": "供应商"
+    },
+    {
+      "cls": "bay-section",
+      "label": null,
+      "labelledby": null,
+      "headingInside": "本次运行"
+    },
+    {
+      "cls": "bay-section",
+      "label": null,
+      "labelledby": null,
+      "headingInside": "全局设置"
+    }
+  ],
+  "mainCount": 0,
+  "benchTag": "DIV",
+  "railTag": "DIV",
+  "panelTag": "DIV",
+  "scrollReach": [
+    {
+      "cls": "rack-scroll",
+      "tabindex": null,
+      "scrollable": true,
+      "reachable": false
+    },
+    {
+      "cls": "panel-scroll",
+      "tabindex": null,
+      "scrollable": true,
+      "reachable": false
+    }
+  ],
+  "tabWalk": [
+    {
+      "i": 0,
+      "cls": "BUTTON",
+      "focusVisible": false,
+      "outline": "none 3px rgb(240, 160, 32)",
+      "offset": "0px",
+      "boxShadow": "rgba(0, 0, 0, 0.8) 0px 2px 4px 0px inset"
+    },
+    {
+      "i": 1,
+      "cls": "BUTTON",
+      "focusVisible": false,
+      "outline": "none 3px rgb(143, 140, 130)",
+      "offset": "0px",
+      "boxShadow": "none"
+    },
+    {
+      "i": 2,
+      "cls": "BUTTON",
+      "focusVisible": false,
+      "outline": "none 3px rgb(240, 160, 32)",
+      "offset": "0px",
+      "boxShadow": "rgba(0, 0, 0, 0.8) 0px 2px 4px 0px inset"
+    },
+    {
+      "i": 3,
+      "cls": "BUTTON",
+      "focusVisible": false,
+      "outline": "none 3px rgb(143, 140, 130)",
+      "offset": "0px",
+      "boxShadow": "none"
+    },
+    {
+      "i": 4,
+      "cls": "BUTTON",
+      "focusVisible": false,
+      "outline": "none 3px rgb(143, 140, 130)",
+      "offset": "0px",
+      "boxShadow": "none"
+    },
+    {
+      "i": 5,
+      "cls": "BUTTON",
+      "focusVisible": false,
+      "outline": "none 3px rgb(143, 140, 130)",
+      "offset": "0px",
+      "boxShadow": "none"
+    }
+  ],
+  "sheet": {
+    "tag": "DIV",
+    "cls": "sheet",
+    "role": "dialog",
+    "ariaModal": "true",
+    "ariaLabel": "河马 · 官方格式 · 长思考",
+    "ariaLabelledby": null,
+    "focusAfterOpen": "BUTTON.",
+    "focusInsideSheet": false,
+    "bodyOverflowHidden": "visible",
+    "rootAriaHidden": null,
+    "backgroundInert": false,
+    "closeBtn": {
+      "cls": "btn quiet icon",
+      "name": "",
+      "aria": null
+    },
+    "headingsInside": [],
+    "iframes": 1,
+    "liveRegions": 0,
+    "factsTerms": [
+      "编号",
+      "时间",
+      "耗时"
+    ],
+    "dtTag": "DT",
+    "factsListTag": "DL",
+    "summaryTag": "DETAILS"
+  },
+  "focusEscapesSheet": [
+    "BUTTON :: 聚合站 · 极速档",
+    "BUTTON :: 某二手额度站",
+    "BUTTON :: 南方中转",
+    "BUTTON :: 文字模型冒充",
+    "BUTTON :: 原厂直连",
+    "BUTTON :: a6",
+    "SELECT :: 全部题目\n穿山甲\n袋鼠\n河马\n考拉\n企鹅",
+    "BUTTON :: 新的在前"
+  ],
+  "focusEscapeCount": 40,
+  "sheetClosedOnEscape": true,
+  "focusAfterEscape": "BUTTON.ch",
+  "toastLive": []
+}

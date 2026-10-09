@@ -1,0 +1,33 @@
+{
+  "animals": [
+    "鹈鹕",
+    "水豚",
+    "穿山甲",
+    "鸭嘴兽",
+    "树懒",
+    "袋鼠",
+    "犀牛",
+    "长颈鹿",
+    "企鹅",
+    "考拉",
+    "羊驼",
+    "河马",
+    "海獭",
+    "刺猬",
+    "狐猴",
+    "大熊猫",
+    "章鱼",
+    "蜗牛",
+    "骆驼",
+    "猫头鹰"
+  ],
+  "template": "请生成一张 SVG 图片：一只骑着自行车的{animal}。只输出 SVG 代码，不要任何解释文字，不要 Markdown 代码块。",
+  "templateEn": "Generate an SVG image of a {animal} riding a bicycle. Output only the SVG code, with no explanation and no Markdown code fence.",
+  "extras": [
+    {
+      "id": "bicycle-only",
+      "label": "一辆自行车（无动物）",
+      "text": "请生成一张 SVG 图片：一辆自行车。只输出 SVG 代码，不要任何解释文字，不要 Markdown 代码块。"
+    }
+  ]
+}
