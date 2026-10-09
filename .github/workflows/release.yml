@@ -1,0 +1,80 @@
+name: 出单文件 exe
+
+# 打一个 vX.Y.Z 的 tag 就构建并发 Release；也可以在 Actions 页手动触发，
+# 手动触发只上传工件、不碰 Release（用来自查这条流水线还通不通）。
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+# 发 Release 要写权限，其余一律只读
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: 装依赖
+        run: npm ci
+
+      - name: 类型检查
+        run: npm run typecheck
+
+      # exe 的名字取自 package.json 的 version。tag 和它不一致的话，Release 上会挂着
+      # 一个叫错版本的 exe —— 宁可在这里失败，也别发出去。
+      - name: tag 与 package.json 的版本要对上
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        run: |
+          $pkg = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          $tag = '${{ github.ref_name }}'.TrimStart('v')
+          if ($pkg -ne $tag) {
+            Write-Error "tag v$tag 与 package.json 里的 $pkg 对不上 —— 统一了再打 tag"
+          }
+          Write-Output "版本对上了：$pkg"
+
+      - name: 打包
+        run: npm run build:exe
+
+      # 起得来、能服务、能把 config.json 和 prompts.json 落到用户目录
+      - name: 冒烟
+        shell: pwsh
+        run: ./scripts/smoke-exe.ps1
+
+      - name: 上传工件
+        uses: actions/upload-artifact@v4
+        with:
+          name: pelican-bench-win-x64
+          path: build/pelican-bench-*.exe
+          if-no-files-found: error
+
+      # exe 直接挂上去，不套 zip —— 少一步解压
+      - name: 发 Release
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $exe = (Get-ChildItem build/pelican-bench-*.exe).FullName
+          $notes = @'
+          未签名的 Windows 单文件版：下载后双击即用，不需要装 Node.js。
+
+          首次运行 Windows 会弹「已保护你的电脑」—— 点「更多信息」→「仍要运行」。
+          没买代码签名证书，所以只能这样。不放心就别用现成的：在仓库根目录跑
+          `npm install && npm run build:exe`，产物和这里这个出自同一条命令。
+
+          数据落在 `%APPDATA%\PelicanBench`，exe 放哪都行 —— 换新版本不会丢记录。
+          关掉那个控制台窗口就是退出。
+          '@
+          gh release create '${{ github.ref_name }}' `
+            --title "鹈鹕测试台 ${{ github.ref_name }}" `
+            --notes $notes `
+            $exe
