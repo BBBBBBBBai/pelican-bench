@@ -2,116 +2,111 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![local-only](https://img.shields.io/badge/deploy-localhost%20only-5c6ac4.svg)](#它不做什么)
-[![protocols](https://img.shields.io/badge/protocols-OpenAI%20%C2%B7%20Anthropic-3b7a57.svg)](#两条协议)
+[![protocols](https://img.shields.io/badge/protocols-OpenAI%20%C2%B7%20Anthropic-3b7a57.svg)](#支持的协议)
 
-**把一个模型名发给不同供应商，看谁画得溃不成军。**
+**同一个 `claude-sonnet-4-5`，在 A 家画出一只像样的鹈鹕，在 B 家只回一句「我画不了」，在 C 家画得挺好、但响应体里回显的是另一个模型名。**
 
-同一个 `claude-sonnet-4-5`，在 A 家画出一只像样的鹈鹕，在 B 家只回一句「我画不了」，
-在 C 家画得挺好但响应体里回显的是另一个模型名 —— 这个工具就是用来把这类事**看见并留下证据**的。
+这个工具把这些事看见，并留下证据。
 
-每次运行随机抽一道题，让模型输出一张「骑着自行车的某动物」的 SVG。不评分、不排名，
+每次运行随机抽一道题，让模型输出一张「骑着自行车的某动物」的 SVG。不评分、不排名 ——
 结果按时间沉淀成一本标本册，判断留给人的眼睛。
 
 ![画廊总览](docs/gallery-zh.png)
 
-<p align="center"><em>一次运行 = 一条记录。左边是作品墙，右边是供应商档案与本次运行设置。</em></p>
+*一次运行 = 一条记录。左边是作品墙，右边是供应商档案与本次运行设置。*
 
-*A local-only workbench for comparing the **same model name** across different API providers.
-One prompt, one SVG, no scoring — raw output kept verbatim, with factual flags for truncation,
-model substitution and hard failures. Chinese/English UI. See [English summary](#english-summary).*
+---
+
+| | |
+| --- | --- |
+| **要回答的问题** | 同一个模型名，换个供应商，还画得出来吗 |
+| **怎么回答** | 一题一图，原样留存，只贴可复现的事实标签 |
+| **不做什么** | 不打分、不排名、不请 LLM 当裁判、不并发跑分、不上云 |
+| **技术栈** | Node.js + Express + React 18 + Vite + TypeScript |
+| **界面语言** | 中文 / English |
 
 ## 它不做什么
 
 边界决定了这个工具长什么样：
 
-- **不打分、不排名、不请 LLM 当裁判。** 任何看起来像分数或胜负的视觉语言都是越界。
-- **不批量并发跑分。** 一次一道题、一家供应商，横向对比靠事后翻画廊。
-- **不做账号、不多用户、不云部署。** 永远只服务一台机器上的一个人。
-- **不替模型补台面。** 背景由模型自己的 SVG 决定，工具不统一底色（见[已知限制](#已知限制)）。
+| 不做 | 因为 |
+| --- | --- |
+| 打分、排名、LLM 当裁判 | 任何看起来像分数或胜负的视觉语言都是越界 |
+| 批量并发跑分 | 一次一道题、一家供应商；横向对比靠事后翻画廊 |
+| 账号、多用户、云部署 | 永远只服务一台机器上的一个人 |
+| 替模型补台面 | 背景由模型自己的 SVG 决定，工具不统一底色 |
 
 它不是评测平台，是一张工作台加一本标本册。
 
 ## 快速开始
+
+需要 Node.js 20 或更高版本。
 
 ```bash
 npm install
 npm run dev
 ```
 
-- 前端 http://127.0.0.1:5174
-- 后端 http://127.0.0.1:8787（前端已代理 `/api`）
+| 服务 | 地址 |
+| --- | --- |
+| 前端 | http://127.0.0.1:5174 |
+| 后端 | http://127.0.0.1:8787（前端已代理 `/api`） |
 
 打开页面，在右栏新增供应商（协议 + 接口地址 + 密钥），**再选一个模型名**，点「开始生成」。
 
-Windows 上可直接双击 **`启动.bat`**：自动装依赖、缺前端产物就 build、检测端口占用，
-然后单进程起在 http://127.0.0.1:8787。`启动.bat dev` 是带热刷新的开发模式。
+> [!TIP]
+> Windows 上可以直接双击 **`启动.bat`**。它会自动装依赖、缺前端产物就 build、检测端口占用，
+> 然后单进程起在 http://127.0.0.1:8787。`启动.bat dev` 是带热刷新的开发模式。
 
-## 界面
+## 用法
 
-![详情页](docs/detail.png)
+### 供应商档案里没有「模型名」这一栏
 
-<p align="center"><em>点开任意一格进详情页：大图为主，右边是全部运行数据与异常明细。</em></p>
+添加供应商只填名称、协议、接口地址、密钥、默认参数。模型名是**每次运行现场选的必填项**。
 
-| 区域 | 内容 |
-| --- | --- |
-| 顶栏 | 日期数、记录数、运行状态、中英文切换；右端显示正在跑或最近一次的请求 |
-| 筛选条 | 供应商、题目、排序、格子大小、只看有异常的 |
-| 记录区 | 按天分组，每格含指示灯、耗时、编号、画面、动物 / 供应商 / 模型名 / 日期时刻 / 异常标签 |
-| 右栏 | 供应商档案、本次运行覆盖、全局设置、文件位置 |
+> [!IMPORTANT]
+> 这是刻意的。工具唯一要回答的问题是「**同一个模型名**在不同供应商名下表现如何」，
+> 把模型名存进档案，等于让每家自带一个被测量，横向对比当场失效。
 
-**编号是永久的。** 形如 `2026-10-06 · 第 07 条`（英文界面 `R 2026-10-06 / CH 07`），
-不随筛选、排序、格子大小变化。删掉中间某条不会让后面的重新编号 —— **空出来的号就空着**，
-这样你之前截的图、记下的坐标永远还指向同一件作品。
+### 参数的三个层次
 
-英文界面：
+`全局默认 → 供应商覆盖 → 本次运行覆盖`，后者压前者。
 
-![English UI](docs/gallery-en.png)
+`max_tokens` 全局默认 **32000**，是当作「放开思考」用的，不是算出来的数 —— [OI] 兼容协议里
+这**一个**数同时管思考链和正文，8192 会在模型还在想的时候就把额度用光。
 
-## 四条设计取舍
+> [!NOTE]
+> 供应商那层**留空即跟随全局默认**。别每家抄一遍，否则改全局不会生效。
 
-**① 供应商档案里不存模型名。**
-添加供应商只填名称、协议、接口地址、密钥、默认参数 —— 没有模型名这一栏，它是每次运行现场
-选的必填项。因为工具唯一要回答的问题是「**同一个模型名**在不同供应商名下表现如何」；
-把模型名存进档案，等于让每家自带一个被测量，横向对比当场失效。
+### 思考强度
 
-**② 诚实承认比较是不公平的。**
-随机抽题、同题不重跑，单次的两张图画的本来就是不同动物 —— 画企鹅比画章鱼难看，
-是题目难度问题，不是模型降智。所以界面不给并排对比、不给胜负暗示。
-**累积的样本量才是可信度的来源**：同一个模型名在两家各跑几十次，再看谁的标签多、谁更敷衍。
+六档 `minimal / low / medium / high / xhigh / max`，默认 `high`，按协议换算：
 
-**③ 标签记录事实，不记录好坏。** 挂上任意一个标签即不算干净成功。
+- `openai` —— 原样发 `reasoning_effort`。实测上游会校验这个字段，编造的值稳定返回 400。
+- `anthropic` —— 换算成 `thinking.budget_tokens`（1024 / 2048 / 4096 / 8192 / 12288 / 16000，
+  1024 是官方硬下限），并把 temperature 强制成 1，代价是 `top_p` 永远不会被发出去。
 
-**④ 原样留存优先于整洁。**
-哪怕回来的是废话、半截标签、别人的模型名，也原封不动留着 ——
-**被清洗过的证据没有举证价值**。清洗只作用于「渲染给人看」的那一层，源码层永远可回溯。
+> [!WARNING]
+> Anthropic 那张换算表**没有实测过**（手上没有 Anthropic 的 key）。`openai` 那张是实测的。
 
-## 两条协议
+档位在真实负载上分得开，但幅度温和：实测同一道题 `minimal → max`，思考字符 **+61%**、
+总输出 token **+45%**、耗时 **+39%**。
+
+## 支持的协议
+
+只有两种。
 
 | 协议 | 端点 | 鉴权头 |
 | --- | --- | --- |
 | `openai`（[OI] 兼容） | `POST {baseUrl}/v1/chat/completions` | `Authorization: Bearer <key>` |
 | `anthropic`（Messages） | `POST {baseUrl}/v1/messages` | `x-api-key: <key>` + `anthropic-version: 2023-06-01` |
 
-`baseUrl` 填到根即可（如 `https://api.example.com`），路径由程序拼。仅此两种协议。
+`baseUrl` 填到根即可（如 `https://api.example.com`），路径由程序拼。
 
-**思考强度**六档 `minimal / low / medium / high / xhigh / max`，默认 `high`，按协议换算：
+## 标签
 
-- `openai` 原样发 `reasoning_effort` —— 实测上游会校验这个字段，编造的值稳定返回 400。
-- `anthropic` 换算成 `thinking.budget_tokens`（1024 / 2048 / 4096 / 8192 / 12288 / 16000，
-  1024 是官方硬下限），并把 temperature 强制成 1，代价是 `top_p` 永远不会被发出去。
-  **这张换算表没实测过**（手上没有 Anthropic 的 key），`openai` 那张是实测的。
-
-档位在真实负载上分得开但幅度温和：实测同一道题 `minimal → max`，
-思考字符 **+61%**、总输出 token **+45%**、耗时 **+39%**。
-
-**参数的三个层次**：`全局默认 → 供应商覆盖 → 本次运行覆盖`，后者压前者。
-`max_tokens` 全局默认 **32000**，是当作「放开思考」用的，不是算出来的数 ——
-[OI] 兼容协议里这**一个**数同时管思考链和正文，8192 会在模型还在想的时候就把额度用光。
-供应商那层**留空即跟随全局默认**，别每家抄一遍，否则改全局不会生效。
-
-## 标签与告警
-
-判定不靠 LLM 裁判，全是可复现的事实：
+判定不靠 LLM 裁判，全是可复现的事实。**只要挂了任何一个标签，`ok` 就是 false** ——
+换模型、截断正是要抓的降智信号，不能让它们显示成正常。
 
 | 标签 | 含义 |
 | --- | --- |
@@ -123,14 +118,13 @@ Windows 上可直接双击 **`启动.bat`**：自动装依赖、缺前端产物�
 | `timeout` | 超过设定的超时秒数 |
 | `aborted` | 手动点了停止 |
 
-**只要挂了任何一个标签，`ok` 就是 false。** 换模型、截断正是要抓的降智信号，不能让它们显示成正常。
 大小写差异（请求 `Claude-Sonnet-4-5` 返回 `claude-sonnet-4-5`）不算不符，不会误报。
 
 告警只有两档，同一套语义贯穿画面、指示灯、异常标签三处：
 
-- **红灯** = 请求根本没拿到东西：`http-error`、`timeout`、`render-failed`。
-- **琥珀灯** = 拿到了但有毛病：`not-svg`、`truncated`、`model-mismatch`、`aborted`。
-- **橄榄绿灯** = 干净跑完，一个标签都没有。**熄灭**只出现在「这一格还没跑过」的时候。
+- **红灯** —— 请求根本没拿到东西：`http-error`、`timeout`、`render-failed`。
+- **琥珀灯** —— 拿到了但有毛病：`not-svg`、`truncated`、`model-mismatch`、`aborted`。
+- **橄榄绿灯** —— 干净跑完，一个标签都没有。**熄灭**只出现在「这一格还没跑过」的时候。
 
 红留给「请求压根没通」，其余一律降一档，**不让告警盖过画本身**。
 
@@ -141,9 +135,9 @@ Windows 上可直接双击 **`启动.bat`**：自动装依赖、缺前端产物�
 - **无论成功、失败还是中止，都会落盘一条记录。** 中止时保存已收到的部分并打 `aborted`，
   不会白跑一趟。运行中通过 SSE 实时显示代码与思考过程，结束后渲染最终 SVG。
 
-## 题库与存储
+## 数据落在哪
 
-改 `prompts.json` 不用重启（每次运行都重新读）：
+题池写在 `prompts.json`，改了不用重启（每次运行都重新读）：
 
 ```json
 {
@@ -170,12 +164,15 @@ data/records/2026-10-06/
 ```
 
 目录写在 `config.json` 的 `dataDir`（相对路径按项目根解析，不依赖启动目录）。
-**API Key 单独存在 `config.local.json`**，它已被 `.gitignore` 挡掉；`config.json` 不含密钥，适合提交。
 
-**渲染安全**：模型输出当不可信内容处理。落盘的原始 SVG 原样保留；所有真正拿去渲染的地方先过
-`sanitizeSvg`（去掉 `<script>` / `<foreignObject>` / `on*` 事件属性 / 非 `#` 开头的外链 `href` /
-`javascript:`）。缩略图走 `<img>`（加载 SVG 不执行脚本），详情大图走 `sandbox=""` 且不给
-`allow-scripts` 的 iframe，外加一层内联 CSP。整个 SVG 渲染面不允许任何外部请求。
+> [!IMPORTANT]
+> **API Key 单独存在 `config.local.json`**，它已被 `.gitignore` 挡掉。
+> `config.json` 不含密钥，适合提交。
+
+**渲染安全** —— 模型输出当不可信内容处理。落盘的原始 SVG 原样保留；所有真正拿去渲染的地方
+先过 `sanitizeSvg`（去掉 `<script>` / `<foreignObject>` / `on*` 事件属性 / 非 `#` 开头的外链
+`href` / `javascript:`）。缩略图走 `<img>`（加载 SVG 不执行脚本），详情大图走 `sandbox=""`
+且不给 `allow-scripts` 的 iframe，外加一层内联 CSP。整个 SVG 渲染面不允许任何外部请求。
 
 ## 项目结构
 
@@ -187,6 +184,7 @@ data/records/2026-10-06/
 │  ├─ config.ts            config.json / config.local.json 的读写与清洗
 │  ├─ storage.ts           data/records/ 的读写与编号分配
 │  ├─ prompts.ts           题库读取与抽题
+│  ├─ svg.ts               SVG 抽取与校验（服务端）
 │  └─ chat/                协议适配层：openai.ts / anthropic.ts / types.ts
 ├─ shared/                 前后端共享
 │  ├─ types.ts             RunRecord · AppConfig · FlagCode · RunEvent · 出厂默认值
@@ -203,28 +201,32 @@ data/records/2026-10-06/
 ```
 
 打包成单进程：`npm run build` 产出 `dist/web`，`npm start` 同时提供前端和 API，
-端口用 `PORT` 环境变量指定（默认 8787）。要出单文件 exe，再套一层 Node 单文件打包即可。
+端口用 `PORT` 环境变量指定（默认 8787）。
 
 ## 已知限制
 
 **随机抽题 + 不重跑同题，意味着各家画的是不同的动物。** 单次结果的差异不能直接归因于供应商，
-要得出可信结论只能靠长期累积。
+要得出可信结论只能靠长期累积 —— 画企鹅比画章鱼难看，是题目难度问题，不是模型降智。
 
-**深色背景会吃掉一部分画。** 背景由模型的 SVG 自己决定，工具不替它补台面。所以一只用深色描边、
-又没画底色的动物，在深色记录区里几乎看不见 —— 而它**不会**被标记成异常，因为它确实画出了
-合法的 SVG。这是「原样留存优先于整洁」的代价：真要看清楚，打开详情页（那里同样是它自己的
-背景），或者看 SVG 源码。界面上会明确指出这是「没画背景」，而不是含糊过去。
+> [!WARNING]
+> **深色背景会吃掉一部分画。** 背景由模型的 SVG 自己决定，工具不替它补台面。所以一只用深色
+> 描边、又没画底色的动物，在深色记录区里几乎看不见 —— 而它**不会**被标记成异常，因为它确实
+> 画出了合法的 SVG。这是「原样留存优先于整洁」的代价：真要看清楚，打开详情页（那里同样是它
+> 自己的背景），或者看 SVG 源码。界面上会明确指出这是「没画背景」，而不是含糊过去。
+
+**原样留存优先于整洁。** 哪怕回来的是废话、半截标签、别人的模型名，也原封不动留着 ——
+被清洗过的证据没有举证价值。清洗只作用于「渲染给人看」的那一层，源码层永远可回溯。
 
 不做账号、不多用户、不联网部署，就是个本机自用的工具。
 
-## English summary
+## English
 
 **Animal Bike Bench** is a local-only workbench for the one question provider shopping actually
 raises: *is this provider serving me the model it claims to?*
 
 You register a provider (base URL + key — deliberately **no model name**), then pick a model name
 per run. Each run draws one random prompt from `prompts.json` asking the model to output an SVG of
-some animal riding a bicycle. The raw output is stored verbatim and shown in a gallery, tagged with
+some animal riding a bicycle. Raw output is stored verbatim and shown in a gallery, tagged with
 reproducible, factual flags:
 
 `not-svg` · `truncated` · `model-mismatch` (the strongest substitution signal) · `render-failed` ·
@@ -232,9 +234,7 @@ reproducible, factual flags:
 
 There is no scoring, no LLM judge, no leaderboard, no accounts, no cloud. Two protocols only
 (OpenAI-compatible `/v1/chat/completions` and Anthropic `/v1/messages`). Because prompts are random
-and never re-run, **a single pair of images is not a fair comparison** — only accumulated samples are.
-Bilingual UI, dark theme, keyboard-navigable, WCAG AA body contrast.
+and never re-run, **a single pair of images is not a fair comparison** — only accumulated samples
+are. Bilingual UI, dark theme, keyboard-navigable, WCAG AA body contrast.
 
-## 许可
-
-[MIT](LICENSE) © 2026 BBBBBBBBai
+Requires Node.js 20+. `npm install && npm run dev`, then open http://127.0.0.1:5174.
