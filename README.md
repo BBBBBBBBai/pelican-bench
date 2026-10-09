@@ -49,10 +49,6 @@ Windows 上也可以直接双击 **`启动.bat`**：它会自动 `npm install`�
 检测端口占用，然后单进程起在 http://127.0.0.1:8787。
 `启动.bat dev` 则是带热刷新的开发模式。
 
-**不想花钱也能把链路跑通** —— 项目自带一个本地假供应商，一个端口同时讲两种协议，
-并且内置 11 种人格（正常 / 白描 / 无底深描 / 深底亮色 / 说画不了 / 截断 / 偷换模型名 /
-HTTP 500 / 永挂 / 带思考 / 埋雷）。见 [本地假供应商](#本地假供应商不花钱验证链路)。
-
 ## 界面
 
 ![详情页](docs/detail.png)
@@ -173,7 +169,7 @@ HTTP 500 / 永挂 / 带思考 / 埋雷）。见 [本地假供应商](#本地假�
 | `aborted` | 手动点了停止 |
 
 规则：**只要挂了任何一个标签，`ok` 就是 false。** 换模型、截断这些正是要抓的降智信号，
-不能让它们在记录区里显示成正常。大小写差异（请求 `MOCK-GOOD` 返回 `mock-good`）不算不符，不会误报。
+不能让它们在记录区里显示成正常。大小写差异（请求 `Claude-Sonnet-4-5` 返回 `claude-sonnet-4-5`）不算不符，不会误报。
 
 ### 告警只有两档
 
@@ -242,73 +238,6 @@ data/
 **API Key 单独存在 `config.local.json`**，不在 `config.json` 里 —— 后者适合提交到 git，
 前者已经被 `.gitignore` 挡掉，避免 key 跟着配置一起同步出去。
 
-## 本地假供应商（不花钱验证链路）
-
-```bash
-node tools/mock-provider.mjs      # 监听 127.0.0.1:9911
-```
-
-界面里新增供应商，地址填 `http://127.0.0.1:9911`，Key 随便填，模型名从下面挑：
-
-| 模型 | 模拟的情况 |
-| --- | --- |
-| `mock-good` | 正常画出来 |
-| `mock-paper` | 白底黑线，一笔不多 |
-| `mock-inkonly` | **不画底色、只用深色描边** —— 在深色背景上会消失的那一种 |
-| `mock-vivid` | 深底亮色，画得挺花 |
-| `mock-bad` | 说「我画不了」，输出废话 |
-| `mock-truncated` | SVG 画一半断了 |
-| `mock-mismatch` | 画得挺好，但响应里的模型名是别的 |
-| `mock-error` | 上游 500 |
-| `mock-hang` | 一直不结束，用来试超时和中止 |
-| `mock-thinking` | 先吐思考过程再吐正文 |
-| `mock-evil` | 埋了 script / onload / 外链的恶意 SVG |
-
-同一套模型在 OpenAI 和 Anthropic 两个端点上都能用（假供应商两个端点都实现了）。
-它还会**照着你抽到的那只动物画**（从题目里认字），并把这幅图铺在它自己的底色上，
-所以记录区里每一格的画面都不同 —— 这正是要看的「谁画得溃不成军」。
-
-## 自检脚本
-
-需要先启动假供应商，并且 `npm run dev` 在跑：
-
-```bash
-node tools/smoke.mjs           # 6 个模型 × 2 条协议 = 12 项标签判定
-node tools/smoke2.mjs          # 重试次数、思考模式、模型名大小写
-node tools/smoke-abort.mjs     # 手动中止是否保住部分结果
-node tools/smoke-sanitize.mjs  # 恶意 SVG 清洗是否到位
-```
-
-一条命令跑全部：`npm run smoke`（外加 `npm run check:svg` 的几何检查）。
-
-### 灌演示数据
-
-不花钱把界面装满：`npm run seed`（需要 mock 与 dev 都在跑）。
-它建 8 个指向不同假画风的供应商，各跑 3 只动物，让记录区里同时出现正常图、无底深描图、
-截断、偷换模型、画不出来这几种样本。供应商按名字去重，重复执行只会多跑几轮记录。
-
-### 截图与量测
-
-```bash
-node tools/edge-cdp.mjs shot  <url> <out.png> --width=1440 --height=1800 [--mobile] [--expand]
-node tools/edge-cdp.mjs probe <url> --width=390 --height=900 --mobile
-```
-
-走无头 Edge 的 DevTools 协议（零依赖，Node 24 自带 `WebSocket`，用 `CDP_PORT` 改调试端口）。
-`probe` 会从浏览器里**量**出四类事实：格子几何（行高是否整齐、画面是否同尺寸）、
-WCAG 对比度（按字号选 4.5 或 3 的门槛，沿父链找实际背景色）、横向溢出与裁切元素、
-小于 24×24 的可点元素。改样式之后跑一遍，比肉眼可靠。
-
-`--do=<file.js>` 可以在导航后往页面里注入一段脚本（例如点开详情页）再截图：
-
-```bash
-# 点开第一格有图的记录，截详情页
-node tools/edge-cdp.mjs shot http://127.0.0.1:5174/ .impeccable/review/sheet.png \
-  --width=1440 --height=1000 --do=tools/do-open-sheet.js
-```
-
-`.impeccable/review/PROVENANCE.md` 记着每一张巡检截图的确切捕获命令、视口与数据来源。
-
 ## 打包成 exe
 
 架构上已经留好了口子：后端 `dist/web` 存在时会直接托管前端产出，数据目录和配置文件路径
@@ -340,14 +269,10 @@ npm start         # 单进程同时提供前端和 API
 │  ├─ src/i18n.ts          中英文案（所有文案必须走 key，禁止硬编码）
 │  ├─ src/components/      ControlPanel / Rack / SpecimenSheet / LiveBay / BusBar …
 │  └─ src/lib/svgCheck.ts  前端 SVG 可解析性检查
-├─ tools/                  假供应商、smoke、CDP 截图与量测脚本
 ├─ docs/                   README 用的界面截图
 ├─ prompts.json            题池（可随时改，不用重启）
 ├─ config.json             出厂配置（可提交；**不含** API Key）
-├─ config.local.json       本机 API Key（已 gitignore，绝不入库）
-├─ DESIGN.md               设计系统与实现笔记
-├─ PRODUCT.md              产品定义、用户与取舍
-└─ .impeccable/            设计巡检报告、量测数据与截图溯源（截图不入库）
+└─ config.local.json       本机 API Key（已 gitignore，绝不入库）
 ```
 
 ## 已知限制
@@ -360,8 +285,6 @@ npm start         # 单进程同时提供前端和 API
 因为它确实画出了合法的 SVG。这是「原样留存优先于整洁」的代价，是知情接受的取舍：
 真要看清楚，打开详情页（那里同样是它自己的背景），或者看 SVG 源码。
 界面上明确指出这是「没画背景」，而不是含糊过去。
-
-另外：**浏览器内的实际渲染效果从未被机器截图确认过**（开发环境无截图能力，只能靠 CDP 量测）。
 
 不做账号、不多用户、不联网部署，就是个本机自用的工具。
 
@@ -382,16 +305,6 @@ There is no scoring, no LLM judge, no leaderboard, no accounts, no cloud. Two pr
 (OpenAI-compatible `/v1/chat/completions` and Anthropic `/v1/messages`). Because prompts are random
 and never re-run, **a single pair of images is not a fair comparison** — only accumulated samples are.
 Bilingual UI, dark theme, keyboard-navigable, WCAG AA body contrast.
-
-A bundled mock provider (`node tools/mock-provider.mjs`, port 9911, 11 personalities across both
-protocols) lets you exercise every failure mode without spending a cent.
-
-## 进一步阅读
-
-- [`PRODUCT.md`](PRODUCT.md) —— 产品定义：使用者是谁、刻意不做什么、品牌承诺。
-- [`DESIGN.md`](DESIGN.md) —— 设计系统：配色、字体、布局、组件规范与实现笔记。
-- [`.impeccable/review/PROVENANCE.md`](.impeccable/review/PROVENANCE.md) —— 每张巡检截图的捕获命令与数据来源。
-- `.impeccable/` —— 设计巡检的评审记录与量测报告（a11y、性能、响应式、对比度）。
 
 ## 许可
 

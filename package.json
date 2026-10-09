@@ -10,13 +10,7 @@
     "dev:web": "vite --config web/vite.config.ts",
     "build": "vite build --config web/vite.config.ts",
     "start": "tsx server/index.ts",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "mock": "node tools/mock-provider.mjs",
-    "seed": "node tools/seed-demo.mjs",
-    "shot": "node tools/edge-cdp.mjs shot http://127.0.0.1:5174/ .impeccable/review/desktop.png --width=1440 --height=1800",
-    "check:svg": "tsx tools/check-square.mts",
-    "check:served": "node tools/check-served.mjs",
-    "smoke": "npm run check:svg && node tools/smoke.mjs && node tools/smoke2.mjs && node tools/smoke-abort.mjs && node tools/smoke-sanitize.mjs"
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "express": "^4.21.2",
