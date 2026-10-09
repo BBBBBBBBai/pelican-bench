@@ -1,15 +1,64 @@
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { isSea } from 'node:sea';
 import type { AppConfig, EffortLevel, GenParams, ProviderProfile } from '../shared/types.ts';
 import { DEFAULT_MODEL_PRESETS, DEFAULT_PARAMS, EFFORT_LEVELS } from '../shared/types.ts';
 
-const here = path.dirname(fileURLToPath(import.meta.url));
-/** 项目根目录：server/ 的上一级。打包后也以可执行文件所在目录为基准。 */
-export const PROJECT_ROOT = path.resolve(here, '..');
+/**
+ * 是不是被 SEA 打进单个 exe 里跑。
+ *
+ * 直接问 `node:sea`，不靠猜路径 —— 打包之后 `import.meta.url` 指的是 bundle 里那个
+ * 临时脚本名，不是 exe，`path.resolve(here, '..')` 会指到一个根本不存在的目录。
+ */
+export const PACKAGED: boolean = isSea();
 
-const CONFIG_PATH = path.join(PROJECT_ROOT, 'config.json');
-const PROMPTS_PATH = path.join(PROJECT_ROOT, 'prompts.json');
+/**
+ * 开发模式下的项目根 = server/ 的上一级。
+ *
+ * 打包后 `import.meta.url` 在 CommonJS bundle 里是 undefined（esbuild 只能把 import.meta
+ * 置空），`fileURLToPath` 会直接抛 ERR_INVALID_ARG_TYPE。所以这里既做成函数（打包时压根
+ * 不会调用它），又留了一层兜底 —— 万一哪天开发路径也拿不到 url，退回当前工作目录，
+ * 而不是让整个程序在加载配置这一行就崩掉。
+ */
+function devProjectRoot(): string {
+  const url = import.meta.url;
+  if (!url) return process.cwd();
+  return path.resolve(path.dirname(fileURLToPath(url)), '..');
+}
+
+/** 项目根目录：开发时是 server/ 的上一级；打包后是 exe 所在目录（只用于诊断显示）。 */
+export const PROJECT_ROOT = PACKAGED ? path.dirname(process.execPath) : devProjectRoot();
+
+/**
+ * 所有**可写**文件的家：config.json / config.local.json / prompts.json / data/。
+ *
+ * 开发时就是项目根，行为与从前一字不差。打包后落到 `%APPDATA%\PelicanBench` ——
+ * exe 可能被丢进 Program Files 或者任何只读目录，配置和数据不能跟着它走。
+ * 另外这也让「换一个 exe」和「保住已有记录」变成两件互不干扰的事。
+ */
+export const USER_ROOT = PACKAGED ? userDataDir() : PROJECT_ROOT;
+
+function userDataDir(): string {
+  const base =
+    process.env.APPDATA ||
+    (process.platform === 'win32'
+      ? path.join(os.homedir(), 'AppData', 'Roaming')
+      : path.join(os.homedir(), '.config'));
+  return path.join(base, 'PelicanBench');
+}
+
+// 建目录放在模块加载时。写配置、写题池、落记录散在好几个模块里，与其要求每个
+// 写入口都记得先 mkdir，不如在这里保证它一定存在（开发模式下 PROJECT_ROOT 本来就在）。
+try {
+  fs.mkdirSync(USER_ROOT, { recursive: true });
+} catch (err) {
+  console.error('[config] 建不出数据目录，后面的写入会失败：', USER_ROOT, err);
+}
+
+const CONFIG_PATH = path.join(USER_ROOT, 'config.json');
+const PROMPTS_PATH = path.join(USER_ROOT, 'prompts.json');
 
 export function getConfigPath(): string {
   return CONFIG_PATH;
@@ -138,14 +187,14 @@ export function writeConfig(cfg: AppConfig): void {
 /** 数据目录绝对路径 */
 export function resolveDataDir(cfg?: AppConfig): string {
   const c = cfg ?? readConfig();
-  return path.isAbsolute(c.dataDir) ? c.dataDir : path.resolve(PROJECT_ROOT, c.dataDir);
+  return path.isAbsolute(c.dataDir) ? c.dataDir : path.resolve(USER_ROOT, c.dataDir);
 }
 
 /**
  * API key 不写进 config.json，单独存 config.local.json，避免误传/误同步时泄露。
  * 该文件已在 .gitignore 中。
  */
-const KEYS_PATH = path.join(PROJECT_ROOT, 'config.local.json');
+const KEYS_PATH = path.join(USER_ROOT, 'config.local.json');
 
 type KeyMap = Record<string, string>;
 

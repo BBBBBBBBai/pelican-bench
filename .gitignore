@@ -8,10 +8,15 @@ data/
 config.local.json
 config.local*.json
 
+# 打包中间产物与成品 exe：体积几十 MB，不进仓库。构建脚本本身要入库。
+/build/*
+!/build/build-exe.mjs
+
 # 编辑器 / 工具留下的本机副本与恢复产物
 .backup/
 .acl-recovery/
 tmp-*.txt
+.tmp-*/
 
 # 只在本机使用的开发期素材：探针脚本、设计巡检报告与截图
 /tools/

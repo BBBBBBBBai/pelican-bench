@@ -1,5 +1,4 @@
-import fs from 'node:fs';
-import path from 'node:path';
+import { spawn } from 'node:child_process';
 import express from 'express';
 import type { NextFunction, Request, Response } from 'express';
 import type { AppConfig, EffortLevel, GenParams, ProviderProfile, RunRequest } from '../shared/types.ts';
@@ -9,16 +8,19 @@ import {
   getConfigPath,
   getPromptsPath,
   hasApiKey,
+  PACKAGED,
   PROJECT_ROOT,
   readConfig,
   resolveDataDir,
   setApiKey,
+  USER_ROOT,
   writeConfig,
 } from './config.ts';
 import { listPrompts, readPromptPool } from './prompts.ts';
 import { RunError, startRun } from './runner.ts';
 import { prepareSvgForImg } from '../shared/svg.ts';
 import { deleteRecord, getRecord, listRecords, patchRecord, readSideFile, stats } from './storage.ts';
+import { attachWeb, hasWeb } from './web-assets.ts';
 
 const app = express();
 app.use(express.json({ limit: '2mb' }));
@@ -328,13 +330,9 @@ app.delete('/api/records/:id', (req, res) => {
 
 // ---------------------------------------------------------------- 静态资源（生产构建）
 
-const webDist = path.join(PROJECT_ROOT, 'dist', 'web');
-if (fs.existsSync(webDist)) {
-  app.use(express.static(webDist));
-  app.get(/^(?!\/api\/).*/, (_req, res) => {
-    res.sendFile(path.join(webDist, 'index.html'));
-  });
-}
+// 前端产物：开发时读磁盘上的 dist/web，打包后读 exe 里内嵌的资源（见 server/web-assets.ts）。
+// 没构建过前端就整段跳过 —— 让请求拿到 Express 本来的 404，而不是一页「产物缺失」。
+if (hasWeb()) attachWeb(app);
 
 // ---------------------------------------------------------------- 兜底
 
@@ -360,13 +358,68 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   res.status(status).json({ error: err instanceof Error ? err.message : String(err) });
 });
 
-app.listen(PORT, '127.0.0.1', () => {
-  const cfg = readConfig();
-  console.log(`[server] 已启动：http://127.0.0.1:${PORT}`);
-  console.log(`[server] 配置文件：${getConfigPath()}`);
-  console.log(`[server] 题池文件：${getPromptsPath()}`);
-  console.log(`[server] 数据目录：${resolveDataDir(cfg)}`);
-  if (!cfg.providers.length) {
-    console.log('[server] 还没有供应商档案，请在界面右侧添加。');
+/**
+ * 从起始端口往上找一个能 listen 的端口。
+ *
+ * 8787 被占（又开了一份 exe、或者别的程序占着）不该让整个程序弹栈崩掉。对一个
+ * 「双击就能用」的工具来说，崩掉的代价远远大于端口号多一位。往上找 20 个够用了。
+ */
+function listenWithFallback(port: number, tries = 20): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const attempt = (p: number, left: number): void => {
+      const srv = app.listen(p, '127.0.0.1');
+      srv.once('listening', () => resolve(p));
+      srv.once('error', (err: NodeJS.ErrnoException) => {
+        if (err.code === 'EADDRINUSE' && left > 0) {
+          attempt(p + 1, left - 1);
+          return;
+        }
+        reject(err);
+      });
+    };
+    attempt(port, tries);
+  });
+}
+
+/** 开系统默认浏览器。打不开就算了 —— 地址已经印在控制台上了。 */
+function openBrowser(url: string): void {
+  const win = process.platform === 'win32';
+  const cmd = win ? process.env.ComSpec || 'cmd.exe' : process.platform === 'darwin' ? 'open' : 'xdg-open';
+  // Windows 的 start 会把第一个带引号的参数当成窗口标题，所以那个空串不能省。
+  const args = win ? ['/c', 'start', '', url] : [url];
+  try {
+    const child = spawn(cmd, args, { detached: true, stdio: 'ignore', windowsHide: true });
+    child.on('error', () => {});
+    child.unref();
+  } catch {
+    /* 忽略：印在控制台上的地址仍然是可点的 */
   }
-});
+}
+
+listenWithFallback(PORT)
+  .then((port) => {
+    const cfg = readConfig();
+    const url = `http://127.0.0.1:${port}`;
+    console.log(`[server] 已启动：${url}${port === PORT ? '' : `（${PORT} 被占用，往上换了一位）`}`);
+    console.log(`[server] 配置文件：${getConfigPath()}`);
+    console.log(`[server] 题池文件：${getPromptsPath()}`);
+    console.log(`[server] 数据目录：${resolveDataDir(cfg)}`);
+    if (!cfg.providers.length) {
+      console.log('[server] 还没有供应商档案，请在界面右侧添加。');
+    }
+    console.log('[server] 关掉这个窗口就是退出。');
+    // 开发模式（npm run dev）下前端在 Vite 那边跑，别把浏览器抢到 8787 来。
+    const wantOpen = PACKAGED ? process.env.PB_NO_OPEN !== '1' : process.env.PB_OPEN === '1';
+    if (wantOpen && hasWeb()) openBrowser(url);
+  })
+  .catch((err: NodeJS.ErrnoException) => {
+    console.error(`[server] 起不来：${err.code ?? ''} ${err.message}`.trim());
+    // 两种失败长得完全不一样，别给一句放之四海而皆准的废话。
+    if (err.code === 'EADDRINUSE') {
+      console.error(`[server] 从 ${PORT} 一路往上试了 20 个端口都被占了 —— 先关掉已经开着的那一份。`);
+    } else {
+      console.error(`[server] 多半是数据目录写不进去：${USER_ROOT}`);
+      console.error('[server] 检查那个目录的权限，或者删掉它让程序重建。');
+    }
+    process.exitCode = 1;
+  });

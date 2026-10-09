@@ -10,7 +10,8 @@
     "dev:web": "vite --config web/vite.config.ts",
     "build": "vite build --config web/vite.config.ts",
     "start": "tsx server/index.ts",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build:exe": "node build/build-exe.mjs"
   },
   "dependencies": {
     "express": "^4.21.2",
@@ -24,6 +25,8 @@
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.4",
     "concurrently": "^9.1.2",
+    "esbuild": "^0.28.2",
+    "postject": "^1.0.0-alpha.6",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3",
     "vite": "^6.0.7"
