@@ -58,6 +58,31 @@ npm run dev
 > Windows 上可以直接双击 **`启动.bat`**。它会自动装依赖、缺前端产物就 build、检测端口占用，
 > 然后单进程起在 http://127.0.0.1:8787。`启动.bat dev` 是带热刷新的开发模式。
 
+## 单文件版
+
+不想装 Node.js 的话，到 [Releases](https://github.com/BBBBBBBBai/pelican-bench/releases/latest)
+下载 `pelican-bench-<版本>-win-x64.exe`，双击就能用 —— 它会起服务、自己打开浏览器，
+关掉那个黑窗口就是退出。
+
+exe 放在哪都行（桌面、U 盘、Program Files），数据不跟着它走：
+
+```
+%APPDATA%\PelicanBench\
+  config.json           配置
+  config.local.json     API Key
+  prompts.json          题池 —— 首次运行时写出来，之后以这个文件为准
+  data\records\…        记录
+```
+
+换一个新版本的 exe 不会丢记录，删掉 exe 也不会；要清干净就删这个目录。
+源码版的数据在项目根下，和这里互不干扰。
+
+> [!WARNING]
+> **exe 没有代码签名**，首次运行 Windows 会弹「已保护你的电脑」。点「更多信息」→
+> 「仍要运行」。签名证书按年收费，这个工具不赚钱，所以没买。不放心就别用现成的 ——
+> 在仓库根目录跑 `npm install && npm run build:exe`，产物在 `build\` 下，
+> 和 Releases 里那个出自同一条命令（构建日志也是公开的）。
+
 ## 用法
 
 ### 供应商档案里没有「模型名」这一栏
@@ -167,7 +192,8 @@ data/records/2026-10-06/
   20261006-211451-8x5hr.reasoning.txt  # 思考过程（按开关）
 ```
 
-目录写在 `config.json` 的 `dataDir`（相对路径按项目根解析，不依赖启动目录）。
+目录写在 `config.json` 的 `dataDir`（相对路径按父目录解析，不依赖启动目录）。父目录在源码版是
+项目根，在单文件版是 `%APPDATA%\PelicanBench`。
 
 > [!IMPORTANT]
 > **API Key 单独存在 `config.local.json`**，它已被 `.gitignore` 挡掉。
@@ -189,6 +215,7 @@ data/records/2026-10-06/
 │  ├─ storage.ts           data/records/ 的读写与编号分配
 │  ├─ prompts.ts           题库读取与抽题
 │  ├─ svg.ts               SVG 抽取与校验（服务端）
+│  ├─ web-assets.ts        前端产物从哪来：开发读 dist/web，打包后读 exe 内嵌资源
 │  └─ chat/                协议适配层：openai.ts / anthropic.ts / types.ts
 ├─ shared/                 前后端共享
 │  ├─ types.ts             RunRecord · AppConfig · FlagCode · RunEvent · 出厂默认值
@@ -198,6 +225,12 @@ data/records/2026-10-06/
 │  ├─ src/i18n.ts          中英文案（文案必须走 key，禁止硬编码）
 │  ├─ src/components/      ControlPanel / Rack / SpecimenSheet / LiveBay / BusBar …
 │  └─ src/lib/svgCheck.ts  前端 SVG 可解析性检查
+├─ build/
+│  └─ build-exe.mjs        打成单文件 exe（npm run build:exe）
+├─ scripts/
+│  └─ smoke-exe.ps1        单文件版的冒烟：起得来、能服务、配置与题池落到用户目录
+├─ .github/workflows/
+│  └─ release.yml          打 v* 的 tag 就构建并发 Release（也可以手动触发，只出工件）
 ├─ docs/                   README 用的界面截图
 ├─ prompts.json            题池（可随时改，不用重启）
 ├─ config.json             出厂配置（可提交；不含 API Key）
@@ -206,6 +239,10 @@ data/records/2026-10-06/
 
 打包成单进程：`npm run build` 产出 `dist/web`，`npm start` 同时提供前端和 API，
 端口用 `PORT` 环境变量指定（默认 8787）。
+
+再进一步打成单个文件：`npm run build:exe` 产出 `build\pelican-bench-<版本>-win-x64.exe`。
+用的是 Node 官方的单文件应用能力（SEA）—— 前端内嵌成资源，后端用 esbuild 打成一份
+CommonJS 注入官方 `node.exe`。成品约 90 MB，其中 **88 MB 是运行时本身**，不是这个项目的代码。
 
 ## 已知限制
 
@@ -244,3 +281,8 @@ and never re-run, **a single pair of images is not a fair comparison** — only 
 are. Bilingual UI, dark theme, keyboard-navigable, WCAG AA body contrast.
 
 Requires Node.js 20+. `npm install && npm run dev`, then open http://127.0.0.1:5174.
+
+Each release also carries an unsigned Windows single-file build. Download the `.exe`, double-click
+it, and use it like any other program — no Node.js needed. Your data lives in
+`%APPDATA%\PelicanBench`, so swapping the exe for a newer one never loses records. Build it
+yourself with `npm run build:exe`.
