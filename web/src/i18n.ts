@@ -18,8 +18,8 @@ export type Lang = 'zh' | 'en';
 
 const dict = {
   // ── 铭牌 ────────────────────────────────────────────────────────────────
-  'app.brandMark': { zh: 'ANIMAL BIKE BENCH', en: 'ANIMAL BIKE BENCH' },
-  'app.tagline': { zh: '动物骑单车测试台 · 本机自用', en: 'animal-on-bicycle bench · local, single user' },
+  'app.brandMark': { zh: 'PELICAN BENCH', en: 'PELICAN BENCH' },
+  'app.tagline': { zh: '鹈鹕测试台 · 本机自用', en: 'local, single user' },
   'app.lang.zh': { zh: '中', en: '中' },
   'app.lang.en': { zh: 'EN', en: 'EN' },
   'app.loading': { zh: '读取中…', en: 'loading…' },

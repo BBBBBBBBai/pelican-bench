@@ -1,7 +1,7 @@
 {
-  "name": "animal-bike-test",
+  "name": "pelican-bench",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "description": "跨供应商同名模型横向对比工具：随机抽一道「动物骑单车」题，看图判断哪家降智。",
   "scripts": {

@@ -1,4 +1,4 @@
-# 动物骑单车测试台 · Animal Bike Bench
+# 鹈鹕测试台 · Pelican Bench
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![local-only](https://img.shields.io/badge/deploy-localhost%20only-5c6ac4.svg)](#它不做什么)
@@ -107,6 +107,10 @@ npm run dev
 
 判定不靠 LLM 裁判，全是可复现的事实。**只要挂了任何一个标签，`ok` 就是 false** ——
 换模型、截断正是要抓的降智信号，不能让它们显示成正常。
+
+![记录详情](docs/detail.png)
+
+*每条记录都有这样一页读数：请求的模型名与返回的模型名并排摆着，「异常」一栏要么空着，要么列出挂上的标签。*
 
 | 标签 | 含义 |
 | --- | --- |
@@ -221,8 +225,10 @@ data/records/2026-10-06/
 
 ## English
 
-**Animal Bike Bench** is a local-only workbench for the one question provider shopping actually
+**Pelican Bench** is a local-only workbench for the one question provider shopping actually
 raises: *is this provider serving me the model it claims to?*
+
+![English UI](docs/gallery-en.png)
 
 You register a provider (base URL + key — deliberately **no model name**), then pick a model name
 per run. Each run draws one random prompt from `prompts.json` asking the model to output an SVG of
