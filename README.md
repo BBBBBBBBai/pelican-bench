@@ -1,5 +1,9 @@
 # 动物骑单车测试台 · Animal Bike Bench
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![local-only](https://img.shields.io/badge/deploy-localhost%20only-5c6ac4.svg)](#它不做什么)
+[![protocols](https://img.shields.io/badge/protocols-OpenAI%20%C2%B7%20Anthropic-3b7a57.svg)](#两条协议)
+
 **把一个模型名发给不同供应商，看谁画得溃不成军。**
 
 同一个 `claude-sonnet-4-5`，在 A 家画出一只像样的鹈鹕，在 B 家只回一句「我画不了」，
@@ -391,4 +395,4 @@ protocols) lets you exercise every failure mode without spending a cent.
 
 ## 许可
 
-尚未指定许可证。在作者明确之前，保留所有权利。
+[MIT](LICENSE) © 2026 BBBBBBBBai
