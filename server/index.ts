@@ -381,14 +381,20 @@ function listenWithFallback(port: number, tries = 20): Promise<number> {
   });
 }
 
-/** 开系统默认浏览器。打不开就算了 —— 地址已经印在控制台上了。 */
+/**
+ * 开系统默认浏览器。打不开就算了 —— 地址已经印在控制台上了。
+ *
+ * Windows 上刻意走 explorer.exe，而不是 `cmd /c start`：explorer.exe 永远跑在普通
+ * 用户权限，它替我们做 ShellExecute，浏览器就落在普通用户的上下文里。直接 start 的话，
+ * 谁提权启动了这个 exe，浏览器就会被拉成提权实例，而 Chromium 的单实例握手拒绝跨完整性
+ * 级别复用 —— 下一次普通双击就会撞上「现有实例正在以提升的权限运行」那个弹窗。
+ * 经 explorer 转交就不存在这个握手。
+ */
 function openBrowser(url: string): void {
   const win = process.platform === 'win32';
-  const cmd = win ? process.env.ComSpec || 'cmd.exe' : process.platform === 'darwin' ? 'open' : 'xdg-open';
-  // Windows 的 start 会把第一个带引号的参数当成窗口标题，所以那个空串不能省。
-  const args = win ? ['/c', 'start', '', url] : [url];
+  const cmd = win ? 'explorer.exe' : process.platform === 'darwin' ? 'open' : 'xdg-open';
   try {
-    const child = spawn(cmd, args, { detached: true, stdio: 'ignore', windowsHide: true });
+    const child = spawn(cmd, [url], { detached: true, stdio: 'ignore', windowsHide: true });
     child.on('error', () => {});
     child.unref();
   } catch {
