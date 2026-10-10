@@ -15,7 +15,8 @@
  *   3. 生成 sea-config.json：主脚本 + 把 dist/web 整个挂成 `web/…` 资源
  *   4. node --experimental-sea-config 生成 blob
  *   5. 复制一份官方 node.exe 当底子
- *   6. postject 把 blob 注进去
+ *   6. rcedit 换掉 node.exe 自带的图标与版本信息
+ *   7. postject 把 blob 注进去
  *
  * 产物体积的下限就是那份 node.exe（约 88 MB）—— 前端那 443 KB 内嵌进去几乎不花钱。
  */
@@ -24,6 +25,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { build } from 'esbuild';
+import { rcedit } from 'rcedit';
 
 const require_ = createRequire(import.meta.url);
 const ROOT = path.resolve(import.meta.dirname, '..');
@@ -128,7 +130,37 @@ console.log(`    ${path.basename(process.execPath)} → ${exeName}（${mb(fs.sta
 
 // ------------------------------------------------------------------ 6
 
-step(6, 'postject 注入');
+step(6, 'rcedit 换图标与版本信息');
+// 必须在 postject 之前。rcedit 是重写 PE 的资源段，postject 是往文件尾部追加 blob；
+// 反过来做，rcedit 那次重写有可能把注入好的 blob 一起抹掉。
+// 不换的话，成品会顶着 node.exe 自带的图标，版本信息写着 "Node.js JavaScript Runtime"
+// —— 一个自称 Node 却被改动过的 94 MB 二进制，正是杀软启发式爱看的形状。
+const iconPath = path.join(ROOT, 'web', 'public', 'favicon.ico');
+if (!fs.existsSync(iconPath)) {
+  console.error(`    ${path.relative(ROOT, iconPath)} 不存在 —— 先跑 node assets/make-icons.mjs`);
+  process.exit(1);
+}
+await rcedit(exePath, {
+  icon: iconPath,
+  // Windows 的版本资源是四段数字，补一段免得 rcedit 自己拿主意
+  'file-version': `${pkg.version}.0`,
+  'product-version': `${pkg.version}.0`,
+  // 数据写在 %APPDATA%\PelicanBench，不需要管理员；也别去要，要了每次启动都弹 UAC
+  'requested-execution-level': 'asInvoker',
+  'version-string': {
+    CompanyName: 'Pelican Bench',
+    ProductName: 'Pelican Bench',
+    FileDescription: 'Pelican Bench · 鹈鹕测试台',
+    InternalName: 'pelican-bench',
+    OriginalFilename: exeName,
+    LegalCopyright: 'MIT License',
+  },
+});
+console.log(`    ${path.relative(ROOT, iconPath)} → ${exeName}，版本 ${pkg.version}.0，asInvoker`);
+
+// ------------------------------------------------------------------ 7
+
+step(7, 'postject 注入');
 const postjectDir = path.dirname(require_.resolve('postject/package.json'));
 const postjectBin = JSON.parse(fs.readFileSync(path.join(postjectDir, 'package.json'), 'utf8')).bin.postject;
 execFileSync(

@@ -224,7 +224,11 @@ data/records/2026-10-06/
 │  ├─ src/App.tsx          顶栏 + 筛选 + 画廊 + 右栏
 │  ├─ src/i18n.ts          中英文案（文案必须走 key，禁止硬编码）
 │  ├─ src/components/      ControlPanel / Rack / SpecimenSheet / LiveBay / BusBar …
-│  └─ src/lib/svgCheck.ts  前端 SVG 可解析性检查
+│  ├─ src/lib/svgCheck.ts  前端 SVG 可解析性检查
+│  └─ public/              图标产物：favicon.svg / favicon.ico / apple-touch-icon.png
+├─ assets/
+│  ├─ pelican-logo.svg     图标源文件
+│  └─ make-icons.mjs       从源图生成上面那三个（借 Edge 无头截图，无 npm 依赖）
 ├─ build/
 │  └─ build-exe.mjs        打成单文件 exe（npm run build:exe）
 ├─ scripts/
@@ -242,7 +246,10 @@ data/records/2026-10-06/
 
 再进一步打成单个文件：`npm run build:exe` 产出 `build\pelican-bench-<版本>-win-x64.exe`。
 用的是 Node 官方的单文件应用能力（SEA）—— 前端内嵌成资源，后端用 esbuild 打成一份
-CommonJS 注入官方 `node.exe`。成品约 90 MB，其中 **88 MB 是运行时本身**，不是这个项目的代码。
+CommonJS 注入官方 `node.exe`，最后用 rcedit 把 node.exe 自带的图标和版本信息换成这个项目
+自己的（不换的话，属性窗口里会写着 `Node.js JavaScript Runtime` —— 一个自称 Node 的
+94 MB 二进制，正是杀软启发式爱看的形状）。成品约 90 MB，其中 **88 MB 是运行时本身**，
+不是这个项目的代码。
 
 ## 已知限制
 

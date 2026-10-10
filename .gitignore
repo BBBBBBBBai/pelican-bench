@@ -22,6 +22,9 @@ tmp-*.txt
 /tools/
 /.impeccable/
 
+# 图标设计过程的草稿（候选图、对比页、渲染脚本）。最终源图在 assets/pelican-logo.svg。
+/icon-design/
+
 # 内部设计 / 产品文档，不对外
 /DESIGN.md
 /PRODUCT.md
