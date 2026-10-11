@@ -35,16 +35,6 @@ type FormState = typeof EMPTY_FORM;
  *  下一个读代码的人当成「这里真的不安全」，而它只是类型表落后于浏览器。 */
 const DIR_ATTRS = { webkitdirectory: '', directory: '' } as Record<string, string>;
 
-/** 仓库地址。界面上那个「部署到 Vercel」按钮要指向它的一份副本。 */
-const REPO_URL = 'https://github.com/BBBBBBBBai/pelican-bench';
-
-/** 「部署到 Vercel」按钮的目标。
- *
- *  说清楚它**不是**什么：这不是这个应用在给自己部署 —— 浏览器里没有任何凭据能替你
- *  操作你的 Vercel 账号。点它只是打开 Vercel 的导入页，由 Vercel 把这份仓库复制一份到
- *  你自己的账号下建项目并构建（第一次要点一下授权 GitHub）。`repository-url` 要编码。 */
-const DEPLOY_URL = `https://vercel.com/new/clone?repository-url=${encodeURIComponent(REPO_URL)}`;
-
 /** 字节数给人看。存储那一行要说「已用 1.2 MB / 允许 60 GB」，
  *  报成 1284739 只能让人自己去数零。
  *
@@ -1362,19 +1352,6 @@ export function ControlPanel({
               if (files.length) void doMigrate(files);
             }}
           />
-          {/* 部署入口。它和上面那一排回答的是同一类问题 ——「怎么让这套东西在别处也
-              跑起来」：上面是「数据怎么搬走」，这里是「程序怎么搬走」。 */}
-          <div className="silk" style={{ marginTop: 18 }}>
-            {t('deploy.title')}
-          </div>
-          <div className="note" style={{ marginTop: 6 }}>
-            {t('deploy.note')}
-          </div>
-          <div className="row" style={{ marginTop: 8 }}>
-            <a className="btn quiet" href={DEPLOY_URL} target="_blank" rel="noreferrer noopener">
-              {t('deploy.action')}
-            </a>
-          </div>
         </section>
       </div>
     </div>
