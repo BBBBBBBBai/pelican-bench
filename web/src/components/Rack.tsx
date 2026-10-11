@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { RunRecord } from '@shared/types';
 import type { T } from '../i18n';
 import { LiveBay, type LiveState } from './LiveBay';
@@ -33,15 +33,55 @@ function Channel({
   tracked,
   onOpen,
   onRenderFailed,
+  loadSvg,
 }: {
   record: RunRecord;
   t: T;
   tracked: boolean;
   onOpen: (id: string) => void;
   onRenderFailed: (id: string, reason: string) => void;
+  loadSvg: (id: string) => Promise<string | null>;
 }) {
   const [broken, setBroken] = useState(false);
+  const [svgUrl, setSvgUrl] = useState<string | null>(null);
+  const flagged = useRef(false);
   const animal = record.promptLabel || record.promptId;
+
+  /* 缩略图：把这条记录存下来的 SVG 取出来，变成本地 blob 地址。
+     以前这里是 `<img src="/api/records/<id>/svg">` —— 服务端读盘、发回来，浏览器只管显示。
+     现在没有服务端了，而且名册可能一屏几十格，所以是「这一格挂上才读这一条」：
+     一次一个 id，读完生成 blob，卸载时把地址还回去（否则每滚一遍名册就漏一批内存）。 */
+  useEffect(() => {
+    if (!record.hasSvg || broken) {
+      setSvgUrl(null);
+      return;
+    }
+    let cancelled = false;
+    let url: string | null = null;
+
+    void loadSvg(record.id).then((svg) => {
+      if (cancelled) return;
+      if (!svg) {
+        // 记录说它有图，侧车里却没有 —— 与旧版的 404 同一种情况：承认这张图打不开。
+        setBroken(true);
+        if (!flagged.current) {
+          flagged.current = true;
+          onRenderFailed(record.id, t('run.renderFailedByBrowser'));
+        }
+        return;
+      }
+      url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }));
+      setSvgUrl(url);
+    });
+
+    return () => {
+      cancelled = true;
+      if (url) URL.revokeObjectURL(url);
+    };
+    // onRenderFailed 每次 records 变化都会换一个新函数，放进依赖会让整屏缩略图跟着重建
+    // blob 地址；flagged 闩住「同一条只报一次」，所以用旧的闭包也不会重复记账。
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [record.id, record.hasSvg, broken, loadSvg]);
 
   /* 画面、灯、铭牌三处必须是同一种颜色，否则一格之内自相矛盾。
      浏览器渲染失败 = 真出事（红）；没给 SVG / 截断 = 琥珀。
@@ -65,16 +105,22 @@ function Channel({
 
       <div className="ch-plate">
         {record.hasSvg && !broken ? (
-          <img
-            src={`/api/records/${record.id}/svg`}
-            alt=""
-            loading="lazy"
-            decoding="async"
-            onError={() => {
-              setBroken(true);
-              onRenderFailed(record.id, t('run.renderFailedByBrowser'));
-            }}
-          />
+          svgUrl ? (
+            <img
+              src={svgUrl}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              onError={() => {
+                setBroken(true);
+                onRenderFailed(record.id, t('run.renderFailedByBrowser'));
+              }}
+            />
+          ) : (
+            <div className="broken">
+              <span className="silk">{t('app.loading')}</span>
+            </div>
+          )
         ) : (
           <div className={voidFault ? 'broken fault' : 'broken'}>
             <span className="silk">{t(record.hasSvg ? 'ch.broken' : 'ch.noSvg')}</span>
@@ -109,6 +155,7 @@ export function Rack({
   onStop,
   onOpen,
   onRenderFailed,
+  loadSvg,
 }: {
   records: RunRecord[];
   t: T;
@@ -118,6 +165,7 @@ export function Rack({
   onStop: () => void;
   onOpen: (id: string) => void;
   onRenderFailed: (id: string, reason: string) => void;
+  loadSvg: (id: string) => Promise<string | null>;
 }) {
   const providers = useProviderNames(records);
   const prompts = usePromptLabels(records);
@@ -344,6 +392,7 @@ export function Rack({
                     tracked={r.id === trackedId}
                     onOpen={onOpen}
                     onRenderFailed={onRenderFailed}
+                    loadSvg={loadSvg}
                   />
                 ))}
               </div>

@@ -1,7 +1,7 @@
 {
   "dataDir": "./data",
   "promptLang": "zh",
-  "timeoutSec": 120,
+  "timeoutSec": 300,
   "retries": 1,
   "defaultParams": {
     "temperature": 1,

@@ -1,6 +1,6 @@
-import type { Adapter, StreamChunk, StreamOptions } from './types.ts';
-import { postStream, readSse } from './types.ts';
-import type { EffortLevel } from '../../shared/types.ts';
+import type { EffortLevel } from '@shared/types';
+import type { Adapter, StreamChunk, StreamOptions } from './types';
+import { postStream, readSse } from './types';
 
 /**
  * 思考强度档位 → Anthropic extended thinking 的预算（token）。
@@ -19,6 +19,9 @@ const THINKING_BUDGET: Record<EffortLevel, number> = {
 /**
  * Anthropic Messages 协议：POST {baseUrl}/v1/messages
  * 很多中转站只提供这个格式，所以单列一套适配。
+ *
+ * 从 `server/chat/anthropic.ts` 搬来，只有一处改动：多了
+ * `anthropic-dangerous-direct-browser-access` 这个请求头（理由写在下面）。
  */
 export const anthropicAdapter: Adapter = {
   async *stream(opts: StreamOptions): AsyncGenerator<StreamChunk> {
@@ -59,6 +62,13 @@ export const anthropicAdapter: Adapter = {
       {
         'x-api-key': opts.apiKey,
         'anthropic-version': '2023-06-01',
+        // 桌面版没有这个头：那时请求是 Node 发的，不带浏览器 Origin，Anthropic 不看它。
+        // 现在有两种情况会带上 Origin —— 浏览器直连、以及走 Vercel 同源代理时
+        // 代理可能把原请求头一起转过去（我们无法控制它转不转）。
+        // 带上这个头对「没有 Origin 的请求」无害，对「有 Origin 的请求」是唯一的活路，
+        // 所以无条件带着。注意它对 api.anthropic.com 的直连仍然不够（实测仍被 CORS 挡），
+        // 官方站必须走同源代理（见 web/src/lib/net.ts）。
+        'anthropic-dangerous-direct-browser-access': 'true',
       },
       body,
       opts.signal,

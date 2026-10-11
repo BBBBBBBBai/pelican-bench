@@ -23,11 +23,11 @@ const dict = {
   'app.lang.zh': { zh: '中', en: '中' },
   'app.lang.en': { zh: 'EN', en: 'EN' },
   'app.loading': { zh: '读取中…', en: 'loading…' },
-  'app.initFailed': { zh: '连不上本地服务，请确认后台进程还在运行。', en: 'cannot reach the local server — check that the backend is still running.' },
-  // 上面那句说的是「进程不在」，可启动失败也可能是「进程在、但它答了个错」。
-  // 那时再说「连不上」就是在误导人去看一个活着的进程 —— 所以两句分开，
+  'app.initFailed': { zh: '打不开本地数据库。', en: 'cannot open the local database.' },
+  // 上面那句说的是「库都打不开」，可启动失败也可能是「库开了、读某一项时炸了」。
+  // 那时再说「打不开数据库」就是在误导人 —— 所以两句分开，
   // 由下面那行原文说明真正的理由。
-  'app.bootFailed': { zh: '启动时没能读完配置和记录。', en: 'could not finish reading the config and records at startup.' },
+  'app.bootFailed': { zh: '启动时没能读完设置和记录。', en: 'could not finish reading the settings and records at startup.' },
   'app.retry': { zh: '重试', en: 'RETRY' },
 
   // ── 顶栏读数 ────────────────────────────────────────────────────────────
@@ -154,15 +154,15 @@ const dict = {
   'run.needModel': { zh: '先选定模型名才能开始生成', en: 'PICK A MODEL NAME FIRST' },
   'run.needProfile': { zh: '先选一家供应商', en: 'PICK A PROVIDER FIRST' },
   'run.stop': { zh: '停止', en: 'STOP' },
-  // 网络层的两句。原来这两种情况都会把浏览器/开发者的话直接甩到操作员脸上：
-  // 离线时是 "Failed to fetch"，连接被掐断时则是一句话都没有 —— 界面永远停在「运行中」。
+  // 网络层的两句。浏览器直连供应商之后，第一种失败换成了「站点活着但不给 CORS 头」
+  // （或者干脆连不上），第二种仍然是「事件流走到一半没了」。
   'run.networkFailed': {
-    zh: '连不上本地服务 —— 确认后端还在运行',
-    en: 'cannot reach the local server — is the backend still up?',
+    zh: '请求没能发出去 —— 站点可能连不上，或者没有给浏览器 CORS 允许头',
+    en: 'the request never went out — the site may be unreachable or not send a CORS header',
   },
   'run.streamBroken': {
-    zh: '连接中断，这一趟没有结果',
-    en: 'connection dropped — this run has no result',
+    zh: '这一趟没走到结果就结束了',
+    en: 'this run ended before reporting a result',
   },
 
   // ── 控制面板：全局设置 ──────────────────────────────────────────────────
@@ -172,9 +172,37 @@ const dict = {
   'ctrl.retries': { zh: '重试次数', en: 'RETRIES' },
   'ctrl.saveReasoning': { zh: '保存思考过程', en: 'KEEP REASONING' },
   'ctrl.saveRaw': { zh: '保存完整原始响应', en: 'KEEP RAW RESPONSE' },
-  'ctrl.paths': { zh: '文件位置', en: 'ON DISK' },
-  'ctrl.dataDir': { zh: '数据文件夹', en: 'DATA' },
-  'ctrl.promptsFile': { zh: '题库文件', en: 'PROMPTS' },
+  // 这一块原来叫「文件位置 / ON DISK」，列的是三个文件的绝对路径 —— 后端没了之后
+  // 那个概念就没了。浏览器里能说的只有「占了多少、上限多少、会不会被清掉」。
+  'ctrl.storage': { zh: '本地存储', en: 'LOCAL STORAGE' },
+  'ctrl.storageUsed': { zh: '已用 {size} · {n} 条记录', en: '{size} USED · {n} RECORDS' },
+  'ctrl.storageQuota': { zh: '浏览器允许约 {size}', en: 'BROWSER ALLOWS ~{size}' },
+  'ctrl.storagePersisted': { zh: '持久化 {state}', en: 'PERSISTED {state}' },
+  'ctrl.persistedYes': { zh: '已获准', en: 'YES' },
+  'ctrl.persistedNo': { zh: '未获准', en: 'NO' },
+  'ctrl.persistedWarn': {
+    zh: '浏览器还没答应长期保留这批数据，清理浏览数据时可能连记录一起清掉 —— 重要的记录请先导出。',
+    en: 'the browser has not promised to keep this data — clearing site data may take the records with it. export a backup first.',
+  },
+  'ctrl.keyVaultOn': {
+    zh: 'API Key 已加密存放（{n} 把）。钥匙在本机的密钥柜里，导出的压缩包不含它。',
+    en: 'api keys are encrypted at rest ({n}). the vault key stays on this machine only.',
+  },
+  'ctrl.keyVaultOff': {
+    zh: '⚠ 这个浏览器不支持 WebCrypto，API Key 是明文存放的。换较新的 Chrome / Edge 可以自动加密。',
+    en: '⚠ no WebCrypto here, so api keys are stored in plain text. a newer Chrome / Edge encrypts them automatically.',
+  },
+  'ctrl.keyVaultBroken': {
+    zh: '⚠ 有 {n} 把 Key 解不开（钥匙换过，或者库是从别的电脑搬来的）—— 请重新填一次。',
+    en: '⚠ {n} keys could not be decrypted (vault key changed, or the db came from another machine) — re-enter them.',
+  },
+  'ctrl.testConn': { zh: '测试连接', en: 'TEST' },
+  'ctrl.testing': { zh: '测试中…', en: 'TESTING…' },
+  'ctrl.viaProxy': { zh: '经本站代理', en: 'VIA THIS SITE' },
+  'ctrl.viaProxyNote': {
+    zh: '官方站点不允许浏览器直连。勾上之后请求走本站 /api-proxy/ 转发（需要部署在 Vercel 上）。',
+    en: "the official endpoint refuses browser requests. route it through this site's /api-proxy/ instead (needs the Vercel deploy).",
+  },
   'ctrl.langZh': { zh: '中文题目', en: 'CHINESE' },
   'ctrl.langEn': { zh: '英文题目', en: 'ENGLISH' },
   'ctrl.modelPresets': { zh: '模型候选清单', en: 'MODEL CANDIDATES' },
@@ -248,6 +276,36 @@ const dict = {
   },
   'run.deleted': { zh: '已删除', en: 'DELETED' },
   'run.saved': { zh: '已保存', en: 'SAVED' },
+
+  // ── 备份与迁移 ──────────────────────────────────────────────────────────
+  'data.title': { zh: '备份与迁移', en: 'BACKUP & MOVE' },
+  'data.export': { zh: '导出压缩包', en: 'EXPORT ZIP' },
+  'data.exporting': { zh: '打包中…', en: 'PACKING…' },
+  'data.exported': { zh: '已导出 {n} 条记录（{size}）', en: 'exported {n} records ({size})' },
+  'data.includeKeys': { zh: '包含 API Key', en: 'INCLUDE API KEYS' },
+  'data.includeKeysNote': {
+    zh: '会把 {n} 把密钥明文写进压缩包，发给别人之前先确认。',
+    en: 'writes {n} keys in plain text into the zip — check before sharing.',
+  },
+  'data.import': { zh: '导入压缩包', en: 'IMPORT ZIP' },
+  'data.imported': { zh: '导入完成：新增 {n} 条，覆盖 {u} 条', en: 'imported: {n} new, {u} updated' },
+  'data.importOrphans': {
+    zh: '另有 {n} 把 Key 没有对应供应商，已建成「待认领的 Key」—— 填上地址就能用。',
+    en: '{n} keys had no provider — placeholders were created; fill in their addresses.',
+  },
+  'data.importSvgMissing': {
+    zh: '{n} 条记录只有记录、没有 SVG 正文，打开会是空白。',
+    en: '{n} records came without their SVG bodies — they will open blank.',
+  },
+  'data.migrate': { zh: '从旧版本迁移', en: 'MIGRATE FROM OLD VERSION' },
+  'data.migrateNote': {
+    zh: '选择旧版安装目录（里面有 config.json 和 data/）。只读这一次，之后和那个目录再无关系。',
+    en: 'pick the old install folder (the one holding config.json and data/). it is read once, and only once.',
+  },
+  'data.migrated': { zh: '迁移完成：{n} 条记录', en: 'migrated {n} records' },
+  'data.clearKeys': { zh: '清空所有 Key', en: 'CLEAR ALL KEYS' },
+  'data.clearKeysConfirm': { zh: '确认清空 {n} 把', en: 'CONFIRM CLEARING {n}' },
+  'data.clearKeysDone': { zh: '已清空所有 Key', en: 'all keys cleared' },
 } as const;
 
 export type TKey = keyof typeof dict;

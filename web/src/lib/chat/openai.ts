@@ -1,9 +1,11 @@
-import type { Adapter, StreamChunk, StreamOptions } from './types.ts';
-import { postStream, readSse } from './types.ts';
+import type { Adapter, StreamChunk, StreamOptions } from './types';
+import { postStream, readSse } from './types';
 
 /**
  * [OI] 兼容协议：POST {baseUrl}/v1/chat/completions
  * 覆盖 [OI] 官方、DeepSeek、Kimi、智谱以及绝大多数国内中转站。
+ *
+ * 从 `server/chat/openai.ts` 逐字搬来，零改动。
  */
 export const openaiAdapter: Adapter = {
   async *stream(opts: StreamOptions): AsyncGenerator<StreamChunk> {

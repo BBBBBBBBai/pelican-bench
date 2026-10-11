@@ -57,6 +57,13 @@ export default function App() {
     setRecords(res.records);
   }, []);
 
+  // 导入 / 迁移 / 清空 Key 之后要用它：那种改动会同时动到设置**和**记录，
+  // 只重读一半就等于让界面上半截说新话、下半截说旧话。
+  const onDataChanged = useCallback(async () => {
+    await reloadConfig();
+    await reloadRecords();
+  }, [reloadConfig, reloadRecords]);
+
   // 启动读取抽成一颗可重入的函数，因为「服务还没起来」不是终局：
   // `npm run dev` 里前端和后台是两个进程同时在起，Vite 先就绪是常态，
   // 所以第一次读失败很正常。原来这条错误是一堵死墙 —— 页面上没有第二颗按钮，
@@ -144,6 +151,22 @@ export default function App() {
       .catch((err: unknown) => showToast(err instanceof Error ? err.message : String(err), true))
       .finally(() => setDetailLoading(false));
   }, [showToast]);
+
+  /**
+   * 名册里每一格的缩略图要把 SVG 原文取出来。
+   *
+   * 后端还在的时候这一格写的是 `<img src="/api/records/<id>/svg">`，是服务端替我们
+   * 从磁盘读出来发回去的。没有服务端之后，「取数据」这件事必须走 api 这一层 ——
+   * 界面里任何地方都不该自己去碰 IndexedDB，否则存储层一改就要满世界找调用点。
+   * 取不到就给 null，那一格自己会亮成故障。
+   */
+  const loadSvg = useCallback(async (id: string): Promise<string | null> => {
+    try {
+      return (await api.getRecord(id)).svg;
+    } catch {
+      return null;
+    }
+  }, []);
 
   const onRenderFailed = useCallback(
     (id: string, reason: string) => {
@@ -241,6 +264,7 @@ export default function App() {
         selectedId={selectedId}
         onSelect={setSelectedId}
         onConfigChanged={onConfigChanged}
+        onDataChanged={onDataChanged}
         onRun={onRun}
         onStop={onStop}
         onToast={showToast}
@@ -256,6 +280,7 @@ export default function App() {
           onStop={onStop}
           onOpen={openRecord}
           onRenderFailed={onRenderFailed}
+          loadSvg={loadSvg}
         />
       </div>
 

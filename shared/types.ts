@@ -49,6 +49,14 @@ export interface ProviderProfile {
   params: Partial<GenParams>;
   /** 该档案是否已被验证过（一次成功请求） */
   verified?: boolean;
+  /**
+   * 是否经本站代理转发（纯前端版新增）。
+   *
+   * 只对浏览器直连不通的那两家官方站有意义（`api.openai.com` / `api.anthropic.com`）：
+   * 它们连预检都不放行，请求必须变成同源请求才发得出去。留空 = 按地址自动判断
+   * （是那两家就打开，其余一律直连），所以没设置过的老档案不需要迁移。
+   */
+  viaProxy?: boolean;
   createdAt: string;
 }
 
@@ -223,14 +231,9 @@ export const DEFAULT_PARAMS: GenParams = {
 /** 「要测哪个模型」那张候选表的出厂内容。它只是给手用的快捷键，不是测量结果 ——
  *  用户可以在全局设置里改，改完存进 config.json；改空了也不影响任何一次运行。 */
 export const DEFAULT_MODEL_PRESETS: string[] = [
+  'gpt-6-astra',
+  'gpt-6-sol',
   'gpt-6.1-sol',
-  'gpt-6.1',
-  'gpt-5.2-turbo',
-  'claude-sonnet-4-5-20250929',
-  'claude-opus-4-1-20250805',
-  'deepseek-v3.2-reasoner-preview',
-  'gemini-2.5-pro',
-  'qwen3-max',
-  'glm-4.6',
-  'kimi-k2-0905-preview',
+  'claude-opus-5-5',
+  'claude-sonnet-5-5',
 ];

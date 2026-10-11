@@ -3,33 +3,27 @@
   "private": true,
   "version": "0.2.0",
   "type": "module",
-  "description": "跨供应商同名模型横向对比工具：随机抽一道「动物骑单车」题，看图判断哪家降智。",
+  "description": "跨供应商同名模型横向对比工具：随机抽一道「动物骑单车」题，看图判断哪家降智。纯前端版：数据存在浏览器里，整站是一堆静态文件。",
   "scripts": {
-    "dev": "concurrently -n server,web -c cyan,magenta \"npm:dev:server\" \"npm:dev:web\"",
-    "dev:server": "tsx watch server/index.ts",
-    "dev:web": "vite --config web/vite.config.ts",
+    "dev": "vite --config web/vite.config.ts",
     "build": "vite build --config web/vite.config.ts",
-    "start": "tsx server/index.ts",
+    "preview": "vite preview --config web/vite.config.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "build:exe": "node build/build-exe.mjs"
+    "test": "vitest run --config web/vitest.config.ts"
   },
   "dependencies": {
-    "express": "^4.21.2",
+    "fflate": "^0.8.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@types/express": "^4.17.21",
     "@types/node": "^22.10.5",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.4",
-    "concurrently": "^9.1.2",
-    "esbuild": "^0.28.2",
-    "postject": "^1.0.0-alpha.6",
-    "rcedit": "^5.0.1",
-    "tsx": "^4.19.2",
+    "fake-indexeddb": "^6.0.0",
     "typescript": "^5.7.3",
-    "vite": "^6.0.7"
+    "vite": "^6.0.7",
+    "vitest": "^2.1.8"
   }
 }

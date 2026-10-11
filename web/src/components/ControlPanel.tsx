@@ -2,12 +2,13 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 import type { AppConfig, EffortLevel, GenParams, Protocol, RunOverrides, RunRequest } from '@shared/types';
 import { DEFAULT_MODEL_PRESETS, EFFORT_LEVELS } from '@shared/types';
-import { api, type PublicConfig, type PublicProvider } from '../api';
+import { api, type ImportReport, type PublicConfig, type PublicProvider } from '../api';
+import { defaultViaProxy, proxyRouteFor } from '../lib/net';
 import type { T } from '../i18n';
 import { Icon } from './Icon';
 import { paramsLine, Switch } from './bits';
 
-/** 外来字符串的长度上限，与 server/index.ts 的 MAX_PROFILE_NAME / MAX_BASE_URL /
+/** 外来字符串的长度上限，与原来 server/index.ts 的 MAX_PROFILE_NAME / MAX_BASE_URL /
  *  MAX_PRESET_LEN 三处一一对齐。
  *  客户端这一道是「打字的时候就打不进去」，服务端那一道是「绕过界面直接调接口也过不去」。
  *  两边都要有：输入框上的 maxLength 只是方便，不是防线。 */
@@ -28,6 +29,29 @@ const EMPTY_FORM = {
 };
 
 type FormState = typeof EMPTY_FORM;
+
+/** `<input webkitdirectory>` 不是标准属性，React 的类型里没有它。
+ *  写成一条常量再摊进去，比在 JSX 里做类型断言干净 —— 断言会被
+ *  下一个读代码的人当成「这里真的不安全」，而它只是类型表落后于浏览器。 */
+const DIR_ATTRS = { webkitdirectory: '', directory: '' } as Record<string, string>;
+
+/** 字节数给人看。存储那一行要说「已用 1.2 MB / 允许 60 GB」，
+ *  报成 1284739 只能让人自己去数零。
+ *
+ *  `null` 是**有**含义的：`navigator.storage.estimate()` 在某些浏览器/隐私模式下
+ *  给不出配额。那时候说「0 B」是在编 —— 用破折号表示「浏览器没报这个数」。 */
+function fmtBytes(n: number | null | undefined): string {
+  if (typeof n !== 'number' || !Number.isFinite(n)) return '—';
+  if (n <= 0) return '0 B';
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  let v = n;
+  let i = 0;
+  while (v >= 1024 && i < units.length - 1) {
+    v /= 1024;
+    i += 1;
+  }
+  return `${i > 0 && v < 10 ? v.toFixed(1) : Math.round(v)} ${units[i]}`;
+}
 
 /** 档案里没写的字段要留成空串，不能补成数字 —— 补了就把「跟随全局」写死成了具体值。 */
 function paramField(v: number | undefined): string {
@@ -62,8 +86,8 @@ function hostOf(baseUrl: string): string {
   return nameFromBaseUrl(baseUrl) || baseUrl;
 }
 
-/** 与 server/index.ts 的 sanitizePresets 同一套规矩：去首尾空白、丢掉空行、保序去重。
- *  两边必须一致 —— 否则本地看着干净，存回去又原样回来。 */
+/** 与 lib/config.ts 的 coercePresets 同一套规矩：去首尾空白、丢掉空行、保序去重。
+ *  两边必须一致 —— 否则界面上看着干净，存进去又原样回来。 */
 function cleanPresets(raw: string[]): string[] {
   const out: string[] = [];
   for (const item of raw) {
@@ -170,6 +194,7 @@ export function ControlPanel({
   selectedId,
   onSelect,
   onConfigChanged,
+  onDataChanged,
   onRun,
   onStop,
   onToast,
@@ -180,6 +205,9 @@ export function ControlPanel({
   selectedId: string | null;
   onSelect: (id: string | null) => void;
   onConfigChanged: () => void | Promise<void>;
+  /** 导入 / 迁移 / 清空 Key 之后：设置和名册都变了，而且记录也可能整批换了。
+   *  它比 onConfigChanged 重一档（连记录一起重读），所以只在动过数据的地方用。 */
+  onDataChanged: () => void | Promise<void>;
   onRun: (req: RunRequest) => void;
   onStop: () => void;
   onToast: (msg: string, isError?: boolean) => void;
@@ -381,6 +409,144 @@ export function ControlPanel({
       .then(() => onConfigChanged())
       .catch((err: unknown) => onToast(err instanceof Error ? err.message : String(err), true));
   }
+
+  /* ── 测试连接 ──────────────────────────────────────────────────────────────
+     它和「保存 / 删除」共用一条忙线是错的：测试是只读的，凭什么让删除在那几秒里
+     也按不动。自己一条。 */
+  const [probing, setProbing] = useState(false);
+  async function testConnection() {
+    if (!selected || probing) return;
+    clearReceipt();
+    setProbing(true);
+    try {
+      const res = await api.probeProvider(selected.id);
+      showReceipt(res.message, res.ok);
+    } catch (err: unknown) {
+      showReceipt(err instanceof Error ? err.message : String(err), false);
+    } finally {
+      setProbing(false);
+    }
+  }
+
+  /* ── 备份与迁移 ────────────────────────────────────────────────────────────
+     四种动作共用一条忙线（这一条是对的）：它们都在动同一份库。 */
+  const [dataBusy, setDataBusy] = useState<'' | 'export' | 'import' | 'migrate' | 'keys'>('');
+  const [includeKeys, setIncludeKeys] = useState(false);
+  const [keyTotal, setKeyTotal] = useState(0);
+  // 「清空所有 Key」也是两段式的，理由和删除供应商一样：不可逆。
+  // 而且它多一层 —— 这一颗键坐在页尾，误按之后人可能已经滚到别处，
+  // 所以扣下去之后 6 秒自己弹回来（那个「确认」不该无限期等着被第二下撞上）。
+  const [keysArmed, setKeysArmed] = useState(false);
+  const keysArmTimer = useRef<number | null>(null);
+  const zipInput = useRef<HTMLInputElement | null>(null);
+  const dirInput = useRef<HTMLInputElement | null>(null);
+
+  // 密钥条数：写确认文案（「确认清空 7 把」）和勾选框旁边那句话都要用。
+  useEffect(() => {
+    let stale = false;
+    void api
+      .keyCount()
+      .then((n) => {
+        if (!stale) setKeyTotal(n);
+      })
+      .catch(() => {
+        if (!stale) setKeyTotal(0);
+      });
+    return () => {
+      stale = true;
+    };
+  }, [config]);
+
+  useEffect(
+    () => () => {
+      if (keysArmTimer.current !== null) window.clearTimeout(keysArmTimer.current);
+    },
+    [],
+  );
+
+  function armKeys() {
+    setKeysArmed(true);
+    if (keysArmTimer.current !== null) window.clearTimeout(keysArmTimer.current);
+    keysArmTimer.current = window.setTimeout(() => setKeysArmed(false), 6000);
+  }
+
+  /* 这三种动作的结论都走根节点那条 toast，不走槽里的回执：
+     回执槽在名册头部，而这些按钮在页尾 —— 结论出现在你眼睛所在的地方才有用。
+     导入报告还可能有两三句（孤儿 Key、缺图），一行回执也放不下。 */
+  function failToast(err: unknown) {
+    onToast(err instanceof Error ? err.message : String(err), true);
+  }
+
+  async function doExport() {
+    if (dataBusy) return;
+    setDataBusy('export');
+    try {
+      const res = await api.exportZip({ includeKeys });
+      onToast(t('data.exported', { n: res.records, size: fmtBytes(res.bytes) }));
+    } catch (err: unknown) {
+      failToast(err);
+    } finally {
+      setDataBusy('');
+    }
+  }
+
+  function reportImport(rep: ImportReport, lead: string) {
+    const bits = [lead];
+    if (rep.orphans.length) bits.push(t('data.importOrphans', { n: rep.orphans.length }));
+    if (rep.recordsWithoutSvg) bits.push(t('data.importSvgMissing', { n: rep.recordsWithoutSvg }));
+    onToast(bits.join(' '));
+  }
+
+  async function doImport(file: File) {
+    if (dataBusy) return;
+    setDataBusy('import');
+    try {
+      const rep = await api.importZip(file);
+      reportImport(rep, t('data.imported', { n: rep.recordsNew, u: rep.recordsUpdated }));
+      await onDataChanged();
+    } catch (err: unknown) {
+      failToast(err);
+    } finally {
+      setDataBusy('');
+    }
+  }
+
+  async function doMigrate(files: File[]) {
+    if (dataBusy) return;
+    setDataBusy('migrate');
+    try {
+      const rep = await api.migrateFromDirectory(files);
+      reportImport(rep, t('data.migrated', { n: rep.recordsNew }));
+      await onDataChanged();
+    } catch (err: unknown) {
+      failToast(err);
+    } finally {
+      setDataBusy('');
+    }
+  }
+
+  async function doClearKeys() {
+    if (dataBusy) return;
+    if (!keysArmed) {
+      armKeys();
+      return;
+    }
+    if (keysArmTimer.current !== null) window.clearTimeout(keysArmTimer.current);
+    setKeysArmed(false);
+    setDataBusy('keys');
+    try {
+      await api.clearAllKeys();
+      setKeyTotal(0);
+      onToast(t('data.clearKeysDone'));
+      // 档案本身没动（只清了 Key），但 hasKey 会变，界面上那几个「有 Key」的标记要跟着灭掉。
+      await onDataChanged();
+    } catch (err: unknown) {
+      failToast(err);
+    } finally {
+      setDataBusy('');
+    }
+  }
+
   /* 名册下面这一条槽。平时露的是「编辑 / 删除」两颗按钮；按下「新建」
      或「编辑供应商」之后，按钮沉进槽底、表单从同一条槽的上沿压下来。
      两块同格同位，按钮先让位、纸随即落下，所以下面的「本次运行」
@@ -395,27 +561,63 @@ export function ControlPanel({
     <div className={`prov-slot${editing ? ' open' : ''}`}>
       <div className="prov-slot-out">
         {selected && (
-          <div className="row" style={{ marginTop: 10 }}>
-            <button type="button" className="btn quiet" onClick={startEdit} disabled={busy}>
-              {t('ctrl.editProfile')}
-            </button>
-            {/* 两段式。第一段不删任何东西，只是把键扣下去：文字变
-                「确认删除」、键座凹进去、刻线提亮。第二段才真的删。
-                用 aria-pressed 而不是 aria-label —— 文字已经换过了，
-                屏幕阅读器读到的是「确认删除，已按下」，正好是这件事。 */}
-            <button
-              type="button"
-              className={`btn quiet halt${armed ? ' armed' : ''}`}
-              aria-pressed={armed}
-              onClick={() => void remove()}
-              disabled={busy}
-            >
-              <span className="halt-face">
-                <Icon name="trash" />
-                {armed ? t('ctrl.deleteConfirm') : t('ctrl.delete')}
-              </span>
-            </button>
-          </div>
+          <>
+            <div className="row" style={{ marginTop: 10 }}>
+              <button
+                type="button"
+                className="btn quiet"
+                onClick={() => void testConnection()}
+                disabled={probing}
+              >
+                <span className="halt-face">
+                  <Icon name="check" />
+                  {probing ? t('ctrl.testing') : t('ctrl.testConn')}
+                </span>
+              </button>
+              <button type="button" className="btn quiet" onClick={startEdit} disabled={busy}>
+                {t('ctrl.editProfile')}
+              </button>
+              {/* 两段式。第一段不删任何东西，只是把键扣下去：文字变
+                  「确认删除」、键座凹进去、刻线提亮。第二段才真的删。
+                  用 aria-pressed 而不是 aria-label —— 文字已经换过了，
+                  屏幕阅读器读到的是「确认删除，已按下」，正好是这件事。 */}
+              <button
+                type="button"
+                className={`btn quiet halt${armed ? ' armed' : ''}`}
+                aria-pressed={armed}
+                onClick={() => void remove()}
+                disabled={busy}
+              >
+                <span className="halt-face">
+                  <Icon name="trash" />
+                  {armed ? t('ctrl.deleteConfirm') : t('ctrl.delete')}
+                </span>
+              </button>
+            </div>
+            {/* 「经本站代理」只对浏览器直连不通的那两家官方站有意义。
+                别的地址上摆这个开关，只会让人以为打开它就能绕过别的站没给 CORS 的问题 ——
+                那件事它做不到。勾了立刻写档案（不等「保存」）：它是一个独立的事实，
+                和表单里那半截还没提交的编辑不是一回事。 */}
+            {proxyRouteFor(selected.baseUrl) && (
+              <label
+                className="note"
+                style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6, cursor: 'pointer' }}
+              >
+                <input
+                  type="checkbox"
+                  checked={selected.viaProxy ?? defaultViaProxy(selected.baseUrl)}
+                  onChange={(e) => {
+                    const next = e.target.checked;
+                    void api
+                      .updateProvider(selected.id, { viaProxy: next })
+                      .then(() => onConfigChanged())
+                      .catch(failToast);
+                  }}
+                />
+                <span title={t('ctrl.viaProxyNote')}>{t('ctrl.viaProxy')}</span>
+              </label>
+            )}
+          </>
         )}
       </div>
 
@@ -1037,14 +1239,119 @@ export function ControlPanel({
             />
           </div>
 
+          {/* 这一块原来叫「文件位置」，列的是那三个文件的绝对路径。后端没了之后
+              「哪个文件在哪」就不再是能问的问题 —— 记录住在这个浏览器的库里，
+              用户需要知道的是另一组事：占了多少、浏览器允许多少、会不会被清掉。 */}
           <div className="silk" style={{ marginTop: 18 }}>
-            {t('ctrl.paths')}
+            {t('ctrl.storage')}
           </div>
           <div className="pathline">
-            {t('ctrl.dataDir')} {config.paths.data}
+            {t('ctrl.storageUsed', { size: fmtBytes(config.storage.usageBytes), n: config.storage.records })}
             <br />
-            {t('ctrl.promptsFile')} {config.paths.prompts}
+            {t('ctrl.storageQuota', { size: fmtBytes(config.storage.quotaBytes) })}
+            {' · '}
+            {t('ctrl.storagePersisted', {
+              state: config.storage.persisted ? t('ctrl.persistedYes') : t('ctrl.persistedNo'),
+            })}
           </div>
+          {!config.storage.persisted && <div className="note">{t('ctrl.persistedWarn')}</div>}
+          {/* Key 是加密存的（keyvault.ts），这句话的作用是让用户不用去翻 DevTools 也能
+              知道「表里躺着的是密文」。解不开的另说一句 —— 那是「从别的电脑搬库过来」
+              的典型症状，提示重填比让他对着一个 401 猜要好。 */}
+          {config.storage.keysEncrypted ? (
+            <div className="note">{t('ctrl.keyVaultOn', { n: keyTotal })}</div>
+          ) : (
+            <div className="note">{t('ctrl.keyVaultOff')}</div>
+          )}
+          {config.storage.brokenKeys > 0 && (
+            <div className="note">{t('ctrl.keyVaultBroken', { n: config.storage.brokenKeys })}</div>
+          )}
+
+          <div className="silk" style={{ marginTop: 18 }}>
+            {t('data.title')}
+          </div>
+          <div className="row" style={{ marginTop: 8 }}>
+            <button
+              type="button"
+              className="btn quiet"
+              onClick={() => void doExport()}
+              disabled={dataBusy !== ''}
+            >
+              {dataBusy === 'export' ? t('data.exporting') : t('data.export')}
+            </button>
+            <button
+              type="button"
+              className="btn quiet"
+              onClick={() => zipInput.current?.click()}
+              disabled={dataBusy !== ''}
+            >
+              {t('data.import')}
+            </button>
+            <button
+              type="button"
+              className="btn quiet"
+              onClick={() => dirInput.current?.click()}
+              disabled={dataBusy !== ''}
+            >
+              {t('data.migrate')}
+            </button>
+            <button
+              type="button"
+              className={`btn quiet halt${keysArmed ? ' armed' : ''}`}
+              aria-pressed={keysArmed}
+              onClick={() => void doClearKeys()}
+              disabled={dataBusy !== '' || keyTotal === 0}
+            >
+              <span className="halt-face">
+                <Icon name="trash" />
+                {keysArmed ? t('data.clearKeysConfirm', { n: keyTotal }) : t('data.clearKeys')}
+              </span>
+            </button>
+          </div>
+          {keyTotal > 0 && (
+            <label
+              className="note"
+              style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8, cursor: 'pointer' }}
+            >
+              <input
+                type="checkbox"
+                checked={includeKeys}
+                onChange={(e) => setIncludeKeys(e.target.checked)}
+              />
+              {t('data.includeKeys')} —— {t('data.includeKeysNote', { n: keyTotal })}
+            </label>
+          )}
+          <div className="note" style={{ marginTop: 6 }}>
+            {t('data.migrateNote')}
+          </div>
+          {/* 两个隐形文件框。必须是两个：`webkitdirectory` 只认目录选择，
+              拿它选不出单个 .zip；而 zip 那个要是也带 multiple，用户选中两个
+              就只会导入第一个、另一个悄悄没了。
+              `e.target.value = ''` 是为了「同一个文件连选两次」也能触发 change ——
+              浏览器认的是「值变了」，不清空的话第二次什么都不发生。 */}
+          <input
+            ref={zipInput}
+            type="file"
+            accept=".zip,application/zip"
+            style={{ display: 'none' }}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              e.target.value = '';
+              if (file) void doImport(file);
+            }}
+          />
+          <input
+            ref={dirInput}
+            type="file"
+            multiple
+            style={{ display: 'none' }}
+            {...DIR_ATTRS}
+            onChange={(e) => {
+              const files = Array.from(e.target.files ?? []);
+              e.target.value = '';
+              if (files.length) void doMigrate(files);
+            }}
+          />
         </section>
       </div>
     </div>

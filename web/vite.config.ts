@@ -8,6 +8,14 @@ const root = path.resolve(here, '..');
 
 export default defineConfig({
   root: here,
+  /**
+   * 相对路径产物。
+   *
+   * 部署在 Vercel 的根域名下时 `/` 和 `./` 没有区别；但一个以 `/` 开头的资源地址
+   * 在子路径（项目页、内网某个目录、`vite preview` 挂在非根路径）下会指到别人的东西上。
+   * 而这个产物就是一堆静态文件 —— 它不该挑自己被放在哪儿。
+   */
+  base: './',
   plugins: [react()],
   resolve: {
     alias: {
@@ -26,15 +34,19 @@ export default defineConfig({
       ignored: ['**/.*.tmpdir/**', '**/*.tmp'],
     },
     proxy: {
-      '/api': {
-        target: 'http://127.0.0.1:8787',
-        changeOrigin: false,
-        // SSE 需要关闭缓冲
-        configure: (proxy) => {
-          proxy.on('proxyRes', (proxyRes) => {
-            proxyRes.headers['cache-control'] = 'no-cache, no-transform';
-          });
-        },
+      // 这两条是 `vercel.json` 里那两条 rewrite 的本地版。官方站不接受浏览器直连
+      // （预检就被拒），部署到 Vercel 上由平台把 `/api-proxy/*` 转到上游；
+      // 本地 dev 想走通这条路径，就得自己也转一次 —— 否则「经本站代理」这个开关
+      // 在本地永远只有失败这一种结果，测不出真假。
+      '/api-proxy/openai': {
+        target: 'https://api.openai.com',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/api-proxy\/openai/, ''),
+      },
+      '/api-proxy/anthropic': {
+        target: 'https://api.anthropic.com',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/api-proxy\/anthropic/, ''),
       },
     },
   },

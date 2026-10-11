@@ -8,9 +8,8 @@ data/
 config.local.json
 config.local*.json
 
-# 打包中间产物与成品 exe：体积几十 MB，不进仓库。构建脚本本身要入库。
-/build/*
-!/build/build-exe.mjs
+# 打包中间产物：体积几十 MB，不进仓库。（Node SEA 那条 exe 产线已经删掉了，
+# 现在只构建静态前端，dist/ 上面已经挡过。）
 
 # 编辑器 / 工具留下的本机副本与恢复产物
 .backup/
@@ -28,3 +27,6 @@ tmp-*.txt
 # 内部设计 / 产品文档，不对外
 /DESIGN.md
 /PRODUCT.md
+
+# Vercel 在本机拉项目时留下的东西
+.vercel/
