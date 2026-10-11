@@ -306,6 +306,14 @@ const dict = {
   'data.clearKeys': { zh: '清空所有 Key', en: 'CLEAR ALL KEYS' },
   'data.clearKeysConfirm': { zh: '确认清空 {n} 把', en: 'CONFIRM CLEARING {n}' },
   'data.clearKeysDone': { zh: '已清空所有 Key', en: 'all keys cleared' },
+
+  // ── 部署 ────────────────────────────────────────────────────────────────
+  'deploy.title': { zh: '部署', en: 'DEPLOY' },
+  'deploy.note': {
+    zh: '想让它也在别处跑起来？点下面这个按钮，Vercel 会把这份仓库复制一份到你自己的账号下建项目并部署（第一次要点一下授权 GitHub）。',
+    en: 'want a copy running somewhere else? vercel clones this repo into your own account and builds it there (you grant GitHub access the first time).',
+  },
+  'deploy.action': { zh: '部署到 Vercel', en: 'DEPLOY TO VERCEL' },
 } as const;
 
 export type TKey = keyof typeof dict;

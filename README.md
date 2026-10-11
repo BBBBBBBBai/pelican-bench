@@ -63,6 +63,12 @@ npm run preview    # 本地起个静态服务器看构建产物
 
 `dist/web/` 就是全部 —— 没有 Node、没有 API 路由、没有要配的环境变量。
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FBBBBBBBBai%2Fpelican-bench)
+
+点上面这个按钮：Vercel 会把这份仓库复制到你自己的账号下建一个项目并部署好。第一次点要授权
+GitHub（之后不用再管），项目名可以改；仓库里带的 `vercel.json` 已经把构建命令与输出目录配好，
+不用手填 —— 几分钟后会给你一个 `https://<项目名>.vercel.app`。
+
 | 放法 | 说明 |
 | --- | --- |
 | 双击 `dist/web/index.html` | Chromium 下可用。`file://` 里 IndexedDB 是通的，直接就能跑起来 |
@@ -166,9 +172,10 @@ Key 解不开，请重新填一次」，那几行保留不动（删了就真没�
 
 > [!NOTE]
 > 「经本站代理」这个开关是给官方站留的一条路：勾上之后请求走同源的 `/api-proxy/openai`
-> 或 `/api-proxy/anthropic`，由**部署这个页面的主机**转发给上游（`vercel.json` 里配好了
-> 那两条 rewrite）。它只在有后端能力的主机上有效；直接打开本地 html 时这个开关没有意义。
-> 另外，Vercel 的 rewrite 会不会把 SSE 流缓冲成一坨，**没有实测过**。
+> 或 `/api-proxy/anthropic`，由**部署这个页面的主机**转发给上游。它需要那台主机上真的有人
+> 配了这两条转发 —— 本仓库的 `vercel.json` **不带**（那是公开无鉴权的转发：任何人发现你的
+> 域名都能拿它当跳板，还能顺手用掉你的配额）。直接打开本地 html 时这个开关也没有意义。
+> 所以默认答案就是上面那句话：**只用 CORS 友好的站**，其余明确报错。
 
 ## 用法
 
@@ -313,7 +320,7 @@ sidecars    SVG / 原始响应 / 思考过程
 │  ├─ types.ts             RunRecord · AppConfig · FlagCode · RunEvent · 出厂默认值
 │  ├─ svg.ts               extractSvg / sanitizeSvg：抽取与渲染前的清洗
 │  └─ prompts.ts           题池组装与抽题（注入 pool，不读文件）
-├─ vercel.json             Vercel 的构建命令、输出目录与两条代理 rewrite
+├─ vercel.json             Vercel 的构建命令与输出目录（没有代理 rewrite）
 ├─ dist/web/               构建产物（已 gitignore）
 ├─ docs/                   README 用的界面截图
 └─ assets/                 图标源文件与生成脚本
